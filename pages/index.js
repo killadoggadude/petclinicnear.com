@@ -41,29 +41,31 @@ export async function getStaticProps() {
   // Take top 8 best rated
   const bestRatedListings = allItems.slice(0, 8); 
 
-  // --- START: Group cities by state --- 
-  const statesMap = {};
-  cities.forEach(city => {
-    const stateName = city.state || 'Unknown State';
-    if (!statesMap[stateName]) {
-      statesMap[stateName] = { name: stateName, cities: [] };
-    }
-    statesMap[stateName].cities.push({ 
-        name: city.name, 
-        slug: city.slug, 
-        // Add fallback default for itemCount
-        itemCount: typeof city.itemCount === 'number' ? city.itemCount : 0 
+  // --- START: Select and Group Top Cities --- 
+  const MIN_LISTINGS_THRESHOLD = 2; // Minimum listings a city needs to be considered
+  const NUM_TOP_CITIES_TO_SHOW = 60;
+  const NUM_COLUMNS = 4;
+
+  const topCities = cities
+    .filter(city => city.itemCount >= MIN_LISTINGS_THRESHOLD) // Filter cities with enough listings
+    .sort((a, b) => b.itemCount - a.itemCount) // Sort by itemCount descending
+    .slice(0, NUM_TOP_CITIES_TO_SHOW); // Take the top N
+
+  // Distribute top cities into columns
+  const topCityColumns = Array.from({ length: NUM_COLUMNS }, () => []);
+  topCities.forEach((city, index) => {
+    topCityColumns[index % NUM_COLUMNS].push({
+        name: city.name,
+        slug: city.slug,
+        itemCount: city.itemCount,
+        state: city.state || null // Include state for display if needed
     });
   });
-  const statesWithCities = Object.values(statesMap).sort((a, b) => a.name.localeCompare(b.name));
-  statesWithCities.forEach(state => {
-      state.cities.sort((a, b) => a.name.localeCompare(b.name));
-  });
-  // --- END: Group cities by state ---
+  // --- END: Select and Group Top Cities ---
 
   return {
     props: {
-      statesWithCities, 
+      topCityColumns, // Added
       allItems,
       bestRatedListings, 
       totalItemCount: allItems.length,
@@ -151,7 +153,7 @@ function FaqItem({ question, answer, isOpen, onToggle }) {
 }
 
 // --- Homepage Component --- 
-export default function Home({ allItems, bestRatedListings, statesWithCities, totalItemCount }) {
+export default function Home({ allItems, bestRatedListings, topCityColumns, totalItemCount }) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
@@ -375,33 +377,38 @@ export default function Home({ allItems, bestRatedListings, statesWithCities, to
                     </section>
                 )}
 
-                {/* Browse by Location Section - Group by State in 3 columns */}
-                {statesWithCities && statesWithCities.length > 0 && (
+                {/* Browse Popular Cities Section - Use 4 columns */}
+                {topCityColumns && topCityColumns.length > 0 && (
                     <section className="mb-16">
                         {/* Section Heading */}
-                        <h2 className="text-3xl font-bold text-center mb-8">Browse Pet Clinics by City</h2>
-                        {/* Grid for States (3 columns on large screens) */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"> 
-                            {statesWithCities.map(state => (
-                                // State Box
-                                <div key={state.name} className="p-6 bg-white rounded-lg shadow border border-gray-200 flex flex-col"> {/* Use flex flex-col */} 
-                                    {/* State Name Heading (H3, Not linked) */}
-                                    <h3 className="font-semibold text-xl mb-4 text-gray-800 border-b pb-2">
-                                       Pet Clinics in {state.name}
-                                    </h3>
-                                    {/* Grid for Cities (2 columns) */}
-                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 flex-grow"> {/* Add flex-grow */} 
-                                        {Array.isArray(state.cities) && state.cities.map(city => (
-                                            <Link key={city.slug} href={`/${city.slug}`}>
-                                                {/* City Name (H4 or P) */}
-                                                <span className="block text-primary-600 hover:text-primary-800 hover:underline text-sm truncate py-0.5">
-                                                    {city.name} ({city.itemCount})
-                                                </span>
-                                            </Link>
+                        <h2 className="text-3xl font-bold text-center mb-8">Browse Popular Cities</h2>
+                        {/* Grid for Columns (4 columns on large screens) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"> 
+                            {topCityColumns.map((column, colIndex) => (
+                                // Column Box
+                                <div key={colIndex} className="p-5 bg-white rounded-lg shadow border border-gray-100"> 
+                                    {/* Simple list of cities within the column */}
+                                    <ul className="space-y-1.5">
+                                        {Array.isArray(column) && column.map(city => (
+                                            <li key={city.slug}>
+                                                <Link href={`/${city.slug}`}>
+                                                    <span className="block text-primary-600 hover:text-primary-800 hover:underline text-sm truncate">
+                                                        {city.name} <span className="text-xs text-gray-400">({city.itemCount})</span>
+                                                    </span>
+                                                </Link>
+                                            </li>
                                         ))}
-                                    </div>
+                                    </ul>
                                 </div>
                             ))}
+                        </div>
+                        {/* Link to see all cities */}
+                        <div className="text-center mt-8">
+                            <Link href="/cities">
+                                <span className="text-primary-600 hover:text-primary-800 hover:underline font-medium">
+                                    View All Cities &rarr;
+                                </span>
+                            </Link>
                         </div>
                     </section>
                 )}
