@@ -52,18 +52,25 @@ export async function getStaticPaths() {
 // Build-time data fetching - Use citySlug only
 export async function getStaticProps({ params }) {
   const data = getProcessedData();
-  const { citySlug } = params; 
+  const { citySlug } = params;
 
   // Find the current city directly
-  const currentCity = data.cities.find(c => c.slug === citySlug);
-  if (!currentCity) return { notFound: true };
+  const currentCityData = data.cities.find(c => c.slug === citySlug);
+  if (!currentCityData) return { notFound: true };
 
-  const itemsInCity = currentCity.items || [];
+  // Create a minimal city object to pass as props, excluding the large items array
+  const minimalCity = {
+    name: currentCityData.name,
+    slug: currentCityData.slug,
+    state: currentCityData.state || null, // Include state if available
+    itemCount: currentCityData.items ? currentCityData.items.length : 0, // Calculate itemCount
+    // DO NOT include currentCityData.items
+  };
 
   return {
     props: {
-      // Ensure city prop is serializable
-      city: JSON.parse(JSON.stringify(currentCity)),
+      // Pass only the minimal city data
+      city: JSON.parse(JSON.stringify(minimalCity)),
     },
   }
 }
@@ -72,36 +79,65 @@ export async function getStaticProps({ params }) {
 // City Page Component - Remove categories prop
 export default function CityPage({ city }) {
   const router = useRouter()
-  // Keep data fetching logic for now, but comment out rendering logic below
-  const initialItems = city.items || [];
+  // Items will now be fetched client-side
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  // const initialItems = city.items || []; // Remove reliance on initialItems from props
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 20;
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRating, setSelectedRating] = useState(0);
   const [selectedReviews, setSelectedReviews] = useState(0);
 
-  // Filter items based on state - Remove category filter logic
+  // Fetch items client-side based on city slug
+  useEffect(() => {
+    if (city?.slug) {
+      setIsLoading(true);
+      setError(null);
+      // In a real app, you'd fetch from an API endpoint
+      // For now, we simulate by filtering the full dataset (less ideal but works)
+      // NOTE: This still requires loading the full dataset client-side initially
+      // A better approach is an API route: /api/cities/[citySlug]/items
+      const fetchData = async () => {
+        try {
+            const allData = getProcessedData(); // Re-read data (inefficient, use API)
+            const cityData = allData.cities.find(c => c.slug === city.slug);
+            setItems(cityData?.items || []);
+        } catch (err) {
+            console.error("Error fetching items client-side:", err);
+            setError("Failed to load listings.");
+            setItems([]);
+        } finally {
+            setIsLoading(false);
+        }
+      };
+      fetchData();
+    }
+  }, [city?.slug]);
+
+  // Filter items based on state - Now uses client-side 'items' state
   const filteredItems = useMemo(() => {
-    let items = [...initialItems];
+    let filtered = [...items]; // Use client-fetched items
     if (searchTerm.trim()) {
       const lowerSearchTerm = searchTerm.toLowerCase();
-      items = items.filter(item => 
+      filtered = filtered.filter(item =>
         item.name?.toLowerCase().includes(lowerSearchTerm) ||
         item.street?.toLowerCase().includes(lowerSearchTerm) ||
         item.description?.toLowerCase().includes(lowerSearchTerm)
       );
     }
     if (selectedRating > 0) {
-      items = items.filter(item => item.rating && item.rating >= selectedRating);
+      filtered = filtered.filter(item => item.rating && item.rating >= selectedRating);
     }
     if (selectedReviews > 0) {
-       items = items.filter(item => {
+       filtered = filtered.filter(item => {
          const reviewCount = Number(item.reviews) || 0;
          return reviewCount >= selectedReviews;
       });
     }
-    return items;
-  }, [initialItems, searchTerm, selectedRating, selectedReviews]);
+    return filtered; // Return filtered client-fetched items
+  }, [items, searchTerm, selectedRating, selectedReviews]);
 
   // Reset page to 1 when filters change - Remove selectedCategory
   useEffect(() => {
@@ -195,8 +231,12 @@ export default function CityPage({ city }) {
                 Showing {paginatedItems.length} of {totalItems} listings found{searchTerm || selectedRating > 0 || selectedReviews > 0 ? ' (filtered)' : ''}.
             </p>
 
-            {filteredItems.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> 
+            {isLoading ? (
+                <p className="text-center text-gray-500 py-10">Loading listings...</p>
+            ) : error ? (
+                 <p className="text-center text-red-500 py-10">{error}</p>
+            ) : filteredItems.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {paginatedItems.map((item) => (
                   <div key={item.slug} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 flex flex-col">
                     {/* --- START: Simplify Image Section Styling for Testing --- */}

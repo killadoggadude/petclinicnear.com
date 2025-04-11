@@ -65,7 +65,7 @@ function getProcessedData() {
 }
 // --- END: Add back getProcessedData function ---
 
-export default function ItemPage({ item, relatedItems, allItems, metaDescription }) {
+export default function ItemPage({ item, metaDescription }) {
   const router = useRouter();
   const baseUrl = "https://petclinicnear.com"; // Updated domain
   const pageUrl = `${baseUrl}${router.asPath}`;
@@ -315,12 +315,10 @@ export default function ItemPage({ item, relatedItems, allItems, metaDescription
             />
             {/* Use Dynamic Sidebar */}
              <RelatedListingsSidebar 
-              relatedItems={relatedItems} 
               currentItemSlug={item.slug}   
               locationSlug={item.citySlug} 
               currentLatitude={item.latitude} 
               currentLongitude={item.longitude}
-              allItems={allItems}
             />
           </aside>
       </div>
@@ -356,7 +354,7 @@ export async function getStaticProps({ params }) {
   console.log(`[getStaticProps /itemSlug] Received params:`, params);
 
   const data = getProcessedData();
-  const { citySlug, itemSlug } = params; 
+  const { citySlug, itemSlug } = params;
 
   // Log the slugs we are looking for
   console.log(`[getStaticProps /itemSlug] Looking for citySlug: "${citySlug}", itemSlug: "${itemSlug}"`);
@@ -369,7 +367,7 @@ export async function getStaticProps({ params }) {
   if (!currentItem) {
     console.error(`[getStaticProps /itemSlug] Item NOT FOUND for citySlug: "${citySlug}", itemSlug: "${itemSlug}"`);
     // Log a snippet of allItems slugs for comparison
-    console.log(`[getStaticProps /itemSlug] Available slugs sample:`, 
+    console.log(`[getStaticProps /itemSlug] Available slugs sample:`,
       data.allItems.slice(0, 5).map(i => ({ city: i.citySlug, item: i.slug }))
     );
     return { notFound: true }
@@ -377,19 +375,12 @@ export async function getStaticProps({ params }) {
 
   console.log(`[getStaticProps /itemSlug] Found item: ${currentItem.name}`);
 
-  const currentCity = data.cities.find(c => c.slug === citySlug); 
-  const relatedItems = currentCity 
-      ? currentCity.items.filter(item => item.slug !== itemSlug)
-      : [];
-
   // Removed category lookup
   const metaDescription = `Find details for ${currentItem.name}, a business located in ${currentItem.city}${currentItem.state ? `, ${currentItem.state}`: ''}. Contact information, services, and more.`;
 
   return {
     props: {
-      item: JSON.parse(JSON.stringify(currentItem)), 
-      relatedItems: JSON.parse(JSON.stringify(relatedItems)), 
-      allItems: JSON.parse(JSON.stringify(data.allItems)), 
+      item: JSON.parse(JSON.stringify(currentItem)), // Pass only the specific item
       metaDescription: metaDescription,
     },
   }
