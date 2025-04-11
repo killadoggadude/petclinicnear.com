@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-semibold; /* Use the 'sans' stack (which now includes Inter) */
+  }
+  /* You might want to set the body font too if needed */
+  /* body {
+    @apply font-sans;
+  } */
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+/* Add custom base styles or component styles here */
+
+/* Custom styles for headings within the generated descriptions (.prose scope) */
+.prose h2 {
+  @apply text-2xl font-semibold mt-6 mb-3 text-gray-800 border-b pb-2;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold mt-5 mb-2 text-gray-700;
+}
+
+/* Adjust spacing or other styles within prose as needed */
+.prose p {
+    @apply mb-4;
+}
+
+.prose ul,
+.prose ol {
+    @apply mb-4 ml-6;
+}
+
+.prose li {
+    @apply mb-1;
+}
+
+/* Ensure links within prose are styled reasonably */
+.prose a {
+    @apply text-blue-600 hover:underline;
+} 

@@ -1,0 +1,45 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Build output
+/.next
+/out
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories
+.idea
+.vscode
+
+# Environment variables
+.env*.local
+.env
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Processed data (should be generated during build)
+data/processed_data.json
+
+# Optional: Ignore the source CSV if you manage it elsewhere
+# data/plumbers.csv
+
+# Optional: Ignore content generation script output if not replacing original
+# data/plumbers_with_content.csv
+
+# Build directory
+/.next/
+/out/
+
+# OS generated files
+.DS_Store
+*.pem
+
+# Ignore environment variables file
+.env
