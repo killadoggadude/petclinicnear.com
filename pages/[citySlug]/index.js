@@ -95,15 +95,16 @@ export default function CityPage({ city }) {
     if (city?.slug) {
       setIsLoading(true);
       setError(null);
-      // In a real app, you'd fetch from an API endpoint
-      // For now, we simulate by filtering the full dataset (less ideal but works)
-      // NOTE: This still requires loading the full dataset client-side initially
-      // A better approach is an API route: /api/cities/[citySlug]/items
+      // Fetch data from the API route
       const fetchData = async () => {
         try {
-            const allData = getProcessedData(); // Re-read data (inefficient, use API)
-            const cityData = allData.cities.find(c => c.slug === city.slug);
-            setItems(cityData?.items || []);
+            // Fetch from the new API endpoint
+            const response = await fetch(`/api/cities/${city.slug}/items`);
+            if (!response.ok) {
+                throw new Error(`API error: ${response.statusText}`);
+            }
+            const fetchedItems = await response.json();
+            setItems(fetchedItems || []);
         } catch (err) {
             console.error("Error fetching items client-side:", err);
             setError("Failed to load listings.");
@@ -113,8 +114,13 @@ export default function CityPage({ city }) {
         }
       };
       fetchData();
+    } else {
+       // Handle case where city.slug is not available initially
+       // (e.g., during fallback or if data is missing)
+       setIsLoading(false);
+       setItems([]); // Ensure items are empty if no slug
     }
-  }, [city?.slug]);
+  }, [city?.slug]); // Keep dependency on city.slug
 
   // Filter items based on state - Now uses client-side 'items' state
   const filteredItems = useMemo(() => {
@@ -214,10 +220,10 @@ export default function CityPage({ city }) {
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="container mx-auto px-4 py-12 max-w-7xl flex flex-col lg:flex-row gap-8">
-        {/* Primary content area should now take full width */}
-        <main className="flex-grow">
+      {/* Main Content Area - Adjust main to take full width */}
+      <div className="container mx-auto px-4 py-12 max-w-7xl">
+        {/* Remove flex layout, main takes full width */}
+        <main className="w-full">
            <SearchFilterBar 
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
@@ -344,12 +350,14 @@ export default function CityPage({ city }) {
               </p>
             )}
         </main>
-        {/* Sidebar Area */}
+        {/* Sidebar Area - REMOVED */}
+        {/* 
         <aside className="w-full lg:w-1/4 lg:max-w-xs flex-shrink-0">
             <FilterSidebar />
         </aside>
+        */}
 
-      </div> { /* End of flex container */ }
+      </div> { /* End of container */ }
 
       {/* Remove City-Specific Text Section */}
       {/* 
