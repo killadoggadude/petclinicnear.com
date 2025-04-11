@@ -37,15 +37,16 @@ function getProcessedData() {
 
 // Build-time path generation - Use cities
 export async function getStaticPaths() {
-  const data = getProcessedData();
-  const paths = [];
-  // Iterate through cities directly
-  data.cities.forEach(city => {
-    if (city.slug) {
-        paths.push({ params: { citySlug: city.slug } });
-    }
-  });
-  return { paths, fallback: false } 
+  // const data = getProcessedData(); // No longer need to read all data here
+  // const paths = []; // No longer pre-generating paths
+  // // Iterate through cities directly
+  // data.cities.forEach(city => {
+  //   if (city.slug) {
+  //       paths.push({ params: { citySlug: city.slug } });
+  //   }
+  // });
+  // Return an empty paths array and set fallback to 'blocking'
+  return { paths: [], fallback: 'blocking' }
 }
 
 // Build-time data fetching - Use citySlug only

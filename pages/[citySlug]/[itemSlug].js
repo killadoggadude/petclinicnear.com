@@ -330,23 +330,24 @@ export default function ItemPage({ item, relatedItems, allItems, metaDescription
 
 // Build-time path generation - Add back getStaticPaths
 export async function getStaticPaths() {
-  const data = getProcessedData();
-  const paths = [];
-  data.allItems.forEach(item => {
-    // Ensure item has citySlug and item slug
-    if(item.citySlug && item.slug) {
-        paths.push({
-            params: { 
-              citySlug: item.citySlug, 
-              itemSlug: item.slug 
-            },
-        });
-    } else {
-        console.warn(`[getStaticPaths /itemSlug] Skipping path generation for item due to missing slugs: ${item.name}`);
-    }
-  });
-  console.log(`[getStaticPaths /itemSlug] Generated ${paths.length} item paths.`);
-  return { paths, fallback: false } 
+  // const data = getProcessedData(); // No longer need to read all data here
+  // const paths = []; // No longer pre-generating paths
+  // data.allItems.forEach(item => {
+  //   // Ensure item has citySlug and item slug
+  //   if(item.citySlug && item.slug) {
+  //       paths.push({
+  //           params: {
+  //             citySlug: item.citySlug,
+  //             itemSlug: item.slug
+  //           },
+  //       });
+  //   } else {
+  //       console.warn(`[getStaticPaths /itemSlug] Skipping path generation for item due to missing slugs: ${item.name}`);
+  //   }
+  // });
+  // console.log(`[getStaticPaths /itemSlug] Generated ${paths.length} item paths.`);
+  // Return an empty paths array and set fallback to 'blocking'
+  return { paths: [], fallback: 'blocking' }
 }
 
 // Build-time data fetching - Use city/item slugs
