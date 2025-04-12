@@ -77,8 +77,13 @@ export default function Layout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-        {/* Add noindex tag */}
-        <meta name="robots" content="noindex, nofollow" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Favicon links - Ensure paths are correct */}
+        <link rel="icon" href="/images/favicon.png" sizes="any" /> 
+        {/* <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" /> */}
+        {/* <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" /> */}
+        {/* Add Google Site Verification */}
+        <meta name="google-site-verification" content="vzbpQPeUWm7YRuYMecsOutD7aEuwFDy9mGyvSrkbxfg" />
       </Head>
 
       <header className="bg-white shadow-md sticky top-0 z-50">

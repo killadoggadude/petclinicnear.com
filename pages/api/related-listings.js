@@ -53,17 +53,38 @@ export default function handler(req, res) {
 
     // Sort by distance (closest first), handling null distances
     const sortedItems = itemsWithDistance.sort((a, b) => {
-        if (a.distance === null && b.distance === null) return 0; // both null, keep order
-        if (a.distance === null) return 1;  // null distances go last
-        if (b.distance === null) return -1; // null distances go last
-        return a.distance - b.distance; // sort by distance
+        if (a.distance === null && b.distance === null) return 0; 
+        if (a.distance === null) return 1;  
+        if (b.distance === null) return -1; 
+        return a.distance - b.distance; 
     });
 
-    // Get top 5 related listings
-    const relatedListings = sortedItems.slice(0, 5);
+    let relatedListings = sortedItems.slice(0, 5);
 
-    // If no listings found in the same city, could implement fallback logic here (e.g., random items)
-    // For now, just return the (potentially empty) relatedListings array.
+    // --- START: Fallback to random items if no nearby listings --- 
+    if (relatedListings.length === 0) {
+      console.log(`[API /related-listings] No items found in city ${citySlug}. Falling back to random items.`);
+      
+      // Get all items again (could optimize by passing allData down if needed)
+      // const allItems = allData.allItems; // Assuming allData is still in scope
+      
+      // Filter out the current item
+      const allOtherItems = allData.allItems.filter(item => item.slug !== currentItemSlug);
+      
+      // Shuffle the array (Fisher-Yates algorithm for better randomness)
+      for (let i = allOtherItems.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [allOtherItems[i], allOtherItems[j]] = [allOtherItems[j], allOtherItems[i]];
+      }
+      
+      // Take the top 10 random items
+      relatedListings = allOtherItems.slice(0, 10);
+      
+      // Mark these as random (optional, for client-side differentiation if needed)
+      // relatedListings = relatedListings.map(item => ({ ...item, isRandomFallback: true }));
+      console.log(`[API /related-listings] Returning ${relatedListings.length} random fallback items.`);
+    }
+    // --- END: Fallback logic ---
 
     res.status(200).json(relatedListings);
 
