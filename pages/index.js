@@ -246,10 +246,11 @@ export default function Home({ allItems, bestRatedListings, topCityColumns, tota
   return (
     <>
       <Head>
-        {/* Dynamically set title based on search */} 
-        <title>{showSearchResults ? `Search: ${searchQuery}` : 'Find Local Listings Near You'} - DirectoryTemplate</title>
-        <meta name="description" content={showSearchResults ? `Search results for ${searchQuery}` : "Search our nationwide directory..."} />
-        <meta name="keywords" content="directory, listings, local, search" />
+        {/* Updated homepage title */}
+        <title>Best Pet Clinics Near Me - Veterinary Directory</title>
+        {/* Keep description dynamic based on search */}
+        <meta name="description" content={showSearchResults ? `Search results for ${searchQuery}` : "Search our nationwide directory for the best local pet clinics and veterinary services near you."} />
+        <meta name="keywords" content="pet clinic, veterinary, vet, veterinarian, near me, directory, animal hospital" />
         <link rel="canonical" href={baseUrl} />
         {/* OG Tags for Homepage */}
         {/* <meta property="og:title" content="Pet Clinic Directory" /> */}
