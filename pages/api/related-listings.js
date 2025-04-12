@@ -60,43 +60,11 @@ export default function handler(req, res) {
         return a.distance - b.distance; 
     });
 
-    let combinedListings = [...sortedNearbyItems]; // Start with nearby items
-    const nearbyCount = combinedListings.length;
+    // Get top 5 nearby listings only
+    const nearbyListings = sortedNearbyItems.slice(0, 5);
     
-    // 4. If we need more items, find random ones
-    if (nearbyCount < TARGET_COUNT) {
-      const needed = TARGET_COUNT - nearbyCount;
-      console.log(`[API /related-listings] Found ${nearbyCount} nearby. Needing ${needed} random items.`);
-
-      // Create a set of slugs already included to avoid duplicates
-      const includedSlugs = new Set(combinedListings.map(item => item.slug));
-      includedSlugs.add(currentItemSlug); // Also exclude the current item itself
-
-      // Filter all items to get potential random candidates
-      const randomCandidates = allData.allItems.filter(item => !includedSlugs.has(item.slug));
-      
-      // Shuffle the candidates (Fisher-Yates)
-      for (let i = randomCandidates.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [randomCandidates[i], randomCandidates[j]] = [randomCandidates[j], randomCandidates[i]];
-      }
-      
-      // Take the required number of random items
-      const randomFallbackItems = randomCandidates.slice(0, needed);
-       // Add distance property as null or calculate if needed (keeping it simple for now)
-      const randomFallbackItemsWithNullDistance = randomFallbackItems.map(item => ({ ...item, distance: null }));
-
-      console.log(`[API /related-listings] Adding ${randomFallbackItemsWithNullDistance.length} random fallback items.`);
-      
-      // Add the random items to the list
-      combinedListings.push(...randomFallbackItemsWithNullDistance);
-    }
-    
-    // 5. Ensure the final list has at most TARGET_COUNT items
-    const finalListings = combinedListings.slice(0, TARGET_COUNT);
-
-    console.log(`[API /related-listings] Returning final list of ${finalListings.length} items.`);
-    res.status(200).json(finalListings);
+    console.log(`[API /related-listings] Returning ${nearbyListings.length} nearby items.`);
+    res.status(200).json(nearbyListings); // Return only nearby listings
 
   } catch (error) {
     console.error('[API /related-listings] Error:', error);

@@ -8,7 +8,9 @@ import ReactMarkdown from 'react-markdown';
 // Dynamically import potentially client-side components
 const Breadcrumbs = dynamic(() => import('../../components/Breadcrumbs'), { ssr: false });
 const GoogleMapComponent = dynamic(() => import('../../components/GoogleMapComponent'), { ssr: false });
-const RelatedListingsSidebar = dynamic(() => import('../../components/RelatedListingsSidebar'), { ssr: false });
+// Import the two new sidebar components
+const NearbyListingsSidebar = dynamic(() => import('../../components/NearbyListingsSidebar'), { ssr: false });
+const BestRatedSidebar = dynamic(() => import('../../components/BestRatedSidebar'), { ssr: false });
 
 // Define the desired display order for days
 const dayDisplayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -168,7 +170,7 @@ export default function ItemPage({ item, metaDescription }) {
                           </p>
                         )}
                         {item.website && (
-                          <p className="mt-3"> {/* Added margin top */} 
+                          <p className="mt-4"> 
                             <a 
                               href={item.website.startsWith('http') ? item.website : `http://${item.website}`}
                               target="_blank"
@@ -187,9 +189,13 @@ export default function ItemPage({ item, metaDescription }) {
               {/* --- END: Image Hero Section --- */}
 
               {/* --- START: Duplicate Info Section --- */}
-              <div className="mb-6 pb-6 border-b border-gray-200"> {/* Added bottom border */} 
-                <h2 className="text-2xl font-bold mb-3 text-gray-800">{item.name}</h2>
-                <div className="space-y-1 text-gray-700">
+              <div className="mb-6 pb-6 border-b border-gray-200">
+                 {/* Updated H2 to include city/state */}
+                <h2 className="text-2xl font-bold mb-3 text-gray-800">
+                  {item.name}{item.city ? ` in ${item.city}${item.state ? `, ${item.state}` : ''}` : ''}
+                </h2>
+                {/* Increased font size in this div */}
+                <div className="space-y-1 text-lg text-gray-700"> {/* Changed text-base to text-lg */} 
                    {item.street && item.city && item.state && (
                       <p className="flex items-start"> 
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -211,7 +217,23 @@ export default function ItemPage({ item, metaDescription }) {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                            <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
                         </svg>
-                        <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">Visit Website</a> 
+                        {/* Display domain name as link text */}
+                        <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                          {(() => { // IIFE to calculate domain
+                              try {
+                                const url = new URL(item.website.startsWith('http') ? item.website : `http://${item.website}`);
+                                let hostname = url.hostname;
+                                // Remove optional 'www.' prefix
+                                if (hostname.startsWith('www.')) {
+                                  hostname = hostname.substring(4);
+                                }
+                                return hostname;
+                              } catch (e) {
+                                // Fallback if URL parsing fails
+                                return item.website;
+                              }
+                           })()} 
+                        </a> 
                       </p>
                    )}
                 </div>
@@ -255,7 +277,7 @@ export default function ItemPage({ item, metaDescription }) {
               {/* --- START: Working Hours Section --- */}
               {workingHoursSchedule && (
                 <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h2 className="text-2xl font-semibold mb-4 text-gray-800">Working Hours</h2>
+                  <h3 className="text-xl font-semibold mb-4 text-gray-800">Working Hours</h3>
                    {/* Added Styling */}
                   <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -300,9 +322,9 @@ export default function ItemPage({ item, metaDescription }) {
             </div>
           </main>
           {/* ... Sidebar ... */}
-          <aside className="w-full md:w-80 lg:w-96 flex-shrink-0 space-y-6">
-            {/* Wrap map in a div with explicit height matching width */}
-            <div className="w-full h-auto aspect-square md:h-80 lg:h-96"> {/* Use aspect-square for responsiveness */} 
+          <aside className="w-full lg:w-1/3 flex-shrink-0 space-y-6">
+            {/* Google Map */}
+            <div className="w-full h-auto aspect-square md:h-80 lg:h-96"> 
               <GoogleMapComponent 
                 latitude={item.latitude}
                 longitude={item.longitude}
@@ -310,12 +332,18 @@ export default function ItemPage({ item, metaDescription }) {
                 address={`${item.street}, ${item.city}, ${item.state}`}
               />
             </div>
-            {/* Use Dynamic Sidebar */}
-             <RelatedListingsSidebar 
+            
+            {/* Nearby Listings Sidebar */}
+             <NearbyListingsSidebar 
               currentItemSlug={item.slug}   
               locationSlug={item.citySlug} 
               currentLatitude={item.latitude} 
               currentLongitude={item.longitude}
+            />
+            
+            {/* Best Rated Sidebar */}
+            <BestRatedSidebar 
+               currentItemSlug={item.slug} 
             />
           </aside>
       </div>
