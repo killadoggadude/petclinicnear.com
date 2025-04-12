@@ -28,7 +28,7 @@ export default function GoogleMapComponent({ latitude, longitude, name, address 
   }
 
   return (
-    <div className="w-full mb-4 aspect-square">
+    <div className="w-full h-full mb-4">
       <div className="relative bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-sm w-full h-full">
         {/* Map Iframe using OpenStreetMap */}
         <div className="w-full h-full relative">
@@ -40,7 +40,7 @@ export default function GoogleMapComponent({ latitude, longitude, name, address 
             marginHeight="0"
             marginWidth="0"
             src={mapUrl} // This will only be set if coordinates are valid
-            style={{ border: 0 }}
+            style={{ border: 0, width: '100%', height: '100%' }} // Ensure explicit width/height styles
             title={`Map showing location of ${name}`}
             loading="lazy" // Add lazy loading
           ></iframe>

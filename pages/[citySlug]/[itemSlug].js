@@ -164,17 +164,18 @@ export default function ItemPage({ item, metaDescription }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
                   {/* Contact Info */}
                   <div>
-                      <h2 className="text-xl font-semibold mb-2 text-gray-700">Contact Information</h2>
+                      {/* Changed to H3 */}
+                      <h3 className="text-xl font-semibold mb-2 text-gray-700">Contact Information</h3>
                       {item.street && item.city && item.state && (
-                        <p className="text-lg text-gray-800 mb-1 flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-1 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <p className="text-base text-gray-800 mb-1 flex items-start"> 
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                             </svg>
                             <span>{item.street}<br/>{item.city}, {item.state}</span>
                         </p>
                       )}
                       {item.phone && (
-                        <p className="text-lg text-gray-800 mb-3 flex items-center">
+                        <p className="text-base text-gray-800 mb-3 flex items-center"> 
                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                              <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                            </svg>
@@ -182,21 +183,22 @@ export default function ItemPage({ item, metaDescription }) {
                         </p>
                       )}
                       {item.website && (
-                        <p className="text-lg flex items-center">
+                        <p className="text-base flex items-center"> 
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                              <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
                           </svg>
-                          <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Visit Website</a>
+                          <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">Visit Website</a> 
                         </p>
                      )}
                   </div>
                   {/* Rating/Reviews */}
                   <div>
-                     <h2 className="text-xl font-semibold mb-2 text-gray-700">Rating & Reviews</h2>
+                      {/* Changed to H3 */}
+                     <h3 className="text-xl font-semibold mb-2 text-gray-700">Rating & Reviews</h3>
                      {(item.rating || item.reviews) ? (
                          <div className="flex items-center text-lg mb-4">
                             {item.rating && (
-                                <><span className="text-yellow-500 mr-2 text-xl">★</span> <span className="font-semibold mr-1">{item.rating.toFixed(1)}</span></>
+                                <><span className="text-yellow-500 mr-2 text-xl">★</span> <span className="font-semibold mr-1">{Number(item.rating).toFixed(1)}</span></>
                             )}
                             {item.reviews && (
                                 <span className="text-gray-600 ml-1">({item.reviews} reviews)</span>
@@ -209,7 +211,8 @@ export default function ItemPage({ item, metaDescription }) {
               </div>
               {/* --- END: Restore Details Grid --- */}
               
-              {/* --- START: Restore Description Section --- */}
+              {/* MOVED: Description Section moved after Working Hours */}
+              {/* 
               {item.description && (
                 <div className="mt-6 pt-6 border-t">
                    <h2 className="text-2xl font-semibold mb-3 text-gray-700">About {item.name}</h2>
@@ -218,25 +221,26 @@ export default function ItemPage({ item, metaDescription }) {
                    </div>
                 </div>
               )}
-              {/* --- END: Restore Description Section --- */}
+              */}
 
-              {/* --- START: Updated Working Hours Table --- */}
+               {/* --- START: Updated Working Hours Table --- */}
               {workingHoursSchedule && (
-                <div className="mt-6 pt-6 border-t">
-                  <h2 className="text-2xl font-semibold mb-4 text-gray-700">Working Hours</h2>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full border border-gray-200 text-sm">
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h2 className="text-2xl font-semibold mb-4 text-gray-800">Working Hours</h2>
+                   {/* Added Styling */}
+                  <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm">
+                    <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-4 py-2 text-left font-medium text-gray-600">Day</th>
-                          <th className="px-4 py-2 text-left font-medium text-gray-600">Hours</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
+                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {dayDisplayOrder.map((day) => (
-                          <tr key={day}>
-                            <td className="px-4 py-2 font-medium text-gray-800">{day}</td>
-                            <td className="px-4 py-2 text-gray-700">{workingHoursSchedule[day] ?? 'Not specified'}</td>
+                        {dayDisplayOrder.map((day, index) => (
+                          <tr key={day} className={`${index % 2 === 0 ? 'bg-white' : 'bg-primary-50/50'}`}> {/* Alternating row colors */} 
+                            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{day}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{workingHoursSchedule[day] ?? 'Not specified'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -245,6 +249,18 @@ export default function ItemPage({ item, metaDescription }) {
                 </div>
               )}
               {/* --- END: Updated Working Hours Table --- */}
+              
+               {/* --- START: Description Section (Moved Here) --- */}
+              {item.description && (
+                <div className="mt-8 pt-8 border-t border-gray-200"> {/* Adjusted margin/padding */} 
+                   <h2 className="text-2xl font-semibold mb-4 text-gray-800">About {item.name}</h2> {/* Updated margin */} 
+                   {/* Using prose for nice default typography */}
+                   <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                       <ReactMarkdown>{item.description}</ReactMarkdown>
+                   </div>
+                </div>
+              )}
+              {/* --- END: Description Section --- */}
 
             </div>
             {/* Back Link - Update style */}
