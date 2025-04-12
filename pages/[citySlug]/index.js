@@ -4,10 +4,6 @@ import { useRouter } from 'next/router'
 import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-// Ensure imports are up TWO levels
-// import Breadcrumbs from '../../components/Breadcrumbs'
-// import FilterSidebar from '../../components/FilterSidebar'
-// import SearchFilterBar from '../../components/SearchFilterBar'
 
 // Dynamically import ALL potentially client-side components
 const Breadcrumbs = dynamic(() => import('../../components/Breadcrumbs'), { ssr: false });
@@ -16,22 +12,14 @@ const SearchFilterBar = dynamic(() => import('../../components/SearchFilterBar')
 
 // Build-time path generation - Use cities
 export async function getStaticPaths() {
-  // const data = getProcessedData(); // No longer need to read all data here
-  // const paths = []; // No longer pre-generating paths
-  // // Iterate through cities directly
-  // data.cities.forEach(city => {
-  //   if (city.slug) {
-  //       paths.push({ params: { citySlug: city.slug } });
-  //   }
-  // });
-  // Return an empty paths array and set fallback to 'blocking'
   return { paths: [], fallback: 'blocking' }
 }
 
 // Build-time data fetching - Use citySlug only
 export async function getStaticProps({ params }) {
-  // Import getProcessedData ONLY here
-  const { getProcessedData } = await import('../../lib/data'); 
+  // Use require inside the function
+  const { getProcessedData } = require('../../lib/data'); 
+  
   const data = getProcessedData();
   const { citySlug } = params;
 
