@@ -18,9 +18,14 @@ const RelatedListingsSidebar = dynamic(() => import('../../components/RelatedLis
 // We need to parse this string into a more usable format.
 
 function parseWorkingHours(hoursString) {
+  // Log the input received
+  console.log("[parseWorkingHours] Input:", hoursString);
+  
   if (!hoursString || typeof hoursString !== 'string') {
+    console.log("[parseWorkingHours] Returning null due to invalid input type or empty string.");
     return null;
   }
+  
   const days = hoursString.split('|').map(dayEntry => dayEntry.trim());
   const schedule = {};
   const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -32,9 +37,14 @@ function parseWorkingHours(hoursString) {
       const time = parts.slice(1).join(':').trim(); // Handle times like "10:30am-..."
       if (dayOrder.includes(day)) {
         schedule[day] = time;
+      } else {
+         console.log(`[parseWorkingHours] Skipping entry with unrecognized day: ${day}`);
       }
+    } else {
+        console.log(`[parseWorkingHours] Skipping entry, couldn't split by colon: ${dayEntry}`);
     }
   });
+  
   // Ensure all days are present, even if closed
   dayOrder.forEach(day => {
     if (!schedule[day]) {
@@ -42,6 +52,8 @@ function parseWorkingHours(hoursString) {
     }
   });
 
+  // Log the final parsed schedule
+  console.log("[parseWorkingHours] Output Schedule:", schedule);
   return schedule; // Returns { Mon: "9am-5pm", Tue: "...", ... }
 }
 // --- END: Add Working Hours Parsing Logic ---
