@@ -131,25 +131,66 @@ export default function ItemPage({ item, metaDescription }) {
       <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8 lg:gap-12 max-w-7xl">
           <main className="flex-grow">
             <div className="bg-white p-6 md:p-8 rounded-lg shadow-md border border-gray-200">
-              {/* --- START: Image Section (Fixed Height Container) --- */}
+
+              {/* --- START: Image Hero Section --- */}
               {item.imageUrl && (
-                // Container: Using fixed height (e.g., h-80) instead of max-height
-                <div className="w-full h-80 relative mb-6 rounded-md overflow-hidden bg-gray-100"> 
+                <div className="relative w-full h-80 rounded-lg overflow-hidden mb-8 shadow-inner"> {/* Added shadow-inner */} 
+                  {/* Background Image */}
                   <Image 
                     src={item.imageUrl}
-                    alt={`${item.name} - Listing in ${item.city}`}
+                    alt={`Background for ${item.name}`}
                     fill 
-                    style={{ objectFit: 'contain' }} // Keep contain
+                    style={{ objectFit: 'cover' }} 
                     priority={true} 
                   />
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent"></div> 
+                  
+                  {/* Content Overlay */}
+                  <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end text-white">
+                    {/* Moved H1 here */}
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2 drop-shadow-md">{item.name}</h1>
+                    
+                    {/* Moved Contact Details Here (no H3) */}
+                    <div className="text-sm text-gray-200 space-y-1">
+                      {item.street && item.city && item.state && (
+                          <p className="flex items-start"> 
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" opacity="0.8">
+                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                              </svg>
+                              <span>{item.street}, {item.city}, {item.state}</span>
+                          </p>
+                        )}
+                        {item.phone && (
+                          <p className="flex items-center"> 
+                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" opacity="0.8">
+                               <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                             </svg>
+                             {item.phone}
+                          </p>
+                        )}
+                        {item.website && (
+                          <p className="flex items-center"> 
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" opacity="0.8">
+                               <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+                            </svg>
+                            {/* Link styled to be lighter */} 
+                            <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-blue-100 hover:underline break-all">Visit Website</a> 
+                          </p>
+                       )}
+                    </div>
+                  </div>
                 </div>
               )}
-              {/* --- END: Image Section --- */}
+              {/* --- END: Image Hero Section --- */}
+
+              {/* REMOVED Original Image Section */}
+              {/* {item.imageUrl && ( ... )} */}
               
-              {/* Title */}
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">{item.name}</h1>
+              {/* REMOVED Original H1 */}
+              {/* <h1 className="text-3xl md:text-4xl font-bold mb-2">{item.name}</h1> */}
               
-              {/* City/State Link - Update styles */}
+              {/* City/State Link - Remains Below Hero */}
               {item.city && (
                   <p className="text-lg text-gray-600 mb-5">
                       Located in: 
@@ -160,40 +201,13 @@ export default function ItemPage({ item, metaDescription }) {
                   </p>
               )}
               
-              {/* --- START: Restore Details Grid --- */}
+              {/* Details Grid - Contact section removed, only Rating remains */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
-                  {/* Contact Info */}
+                  {/* REMOVED Contact Info Section */}
+                  {/* <div> ... </div> */}
+                  
+                  {/* Rating/Reviews - Remains Below Hero */}
                   <div>
-                      {/* Changed to H3 */}
-                      <h3 className="text-xl font-semibold mb-2 text-gray-700">Contact Information</h3>
-                      {item.street && item.city && item.state && (
-                        <p className="text-base text-gray-800 mb-1 flex items-start"> 
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                            </svg>
-                            <span>{item.street}<br/>{item.city}, {item.state}</span>
-                        </p>
-                      )}
-                      {item.phone && (
-                        <p className="text-base text-gray-800 mb-3 flex items-center"> 
-                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                             <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                           </svg>
-                           {item.phone}
-                        </p>
-                      )}
-                      {item.website && (
-                        <p className="text-base flex items-center"> 
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                             <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
-                          </svg>
-                          <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">Visit Website</a> 
-                        </p>
-                     )}
-                  </div>
-                  {/* Rating/Reviews */}
-                  <div>
-                      {/* Changed to H3 */}
                      <h3 className="text-xl font-semibold mb-2 text-gray-700">Rating & Reviews</h3>
                      {(item.rating || item.reviews) ? (
                          <div className="flex items-center text-lg mb-4">
@@ -209,21 +223,8 @@ export default function ItemPage({ item, metaDescription }) {
                       )}
                   </div>
               </div>
-              {/* --- END: Restore Details Grid --- */}
               
-              {/* MOVED: Description Section moved after Working Hours */}
-              {/* 
-              {item.description && (
-                <div className="mt-6 pt-6 border-t">
-                   <h2 className="text-2xl font-semibold mb-3 text-gray-700">About {item.name}</h2>
-                   <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-                       <ReactMarkdown>{item.description}</ReactMarkdown>
-                   </div>
-                </div>
-              )}
-              */}
-
-               {/* --- START: Updated Working Hours Table --- */}
+              {/* --- START: Working Hours Section --- */}
               {workingHoursSchedule && (
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <h2 className="text-2xl font-semibold mb-4 text-gray-800">Working Hours</h2>
@@ -248,7 +249,7 @@ export default function ItemPage({ item, metaDescription }) {
                   </div>
                 </div>
               )}
-              {/* --- END: Updated Working Hours Table --- */}
+              {/* --- END: Working Hours Section --- */}
               
                {/* --- START: Description Section (Moved Here) --- */}
               {item.description && (
