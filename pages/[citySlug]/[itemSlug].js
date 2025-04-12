@@ -131,20 +131,23 @@ export default function ItemPage({ item, metaDescription }) {
       <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8 lg:gap-12 max-w-7xl">
           <main className="flex-grow">
             <div className="bg-white p-6 md:p-8 rounded-lg shadow-md border border-gray-200">
-              {/* --- START: Restore Image --- */}
+              {/* --- START: Improved Image Section --- */}
               {item.imageUrl && (
-                <div className="w-full h-64 sm:h-80 md:h-96 relative mb-6 rounded-md overflow-hidden"> 
+                // Container: Removed fixed height, added max-height, background, keep relative/overflow
+                <div className="w-full max-h-96 relative mb-6 rounded-md overflow-hidden bg-gray-100"> 
                   <Image 
                     src={item.imageUrl}
                     alt={`${item.name} - Listing in ${item.city}`}
                     fill 
-                    style={{ objectFit: 'cover' }} 
-                    sizes="100vw" 
+                    // Changed objectFit to contain
+                    style={{ objectFit: 'contain' }} 
+                    // Removed sizes prop as contain works differently
+                    // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px" 
                     priority={true} 
                   />
                 </div>
               )}
-              {/* --- END: Restore Image --- */}
+              {/* --- END: Improved Image Section --- */}
               
               {/* Title */}
               <h1 className="text-3xl md:text-4xl font-bold mb-2">{item.name}</h1>
