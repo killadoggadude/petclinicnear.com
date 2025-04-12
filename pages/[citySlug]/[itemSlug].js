@@ -170,7 +170,7 @@ export default function ItemPage({ item, metaDescription }) {
                           </p>
                         )}
                         {item.website && (
-                          <p className="mt-4"> 
+                          <p className="mt-6"> 
                             <a 
                               href={item.website.startsWith('http') ? item.website : `http://${item.website}`}
                               target="_blank"
@@ -250,6 +250,39 @@ export default function ItemPage({ item, metaDescription }) {
                       {item.state && <span className="text-gray-500">, {item.state}</span>}
                   </p>
               )}
+              
+              {/* Container for Rating & Top Rated Badge */}
+              <div className="flex flex-col md:flex-row gap-8 items-start mt-6 pt-6 border-t border-gray-200"> 
+                  {/* Rating/Reviews Block (Left) */}
+                  <div className="flex-1"> {/* Use flex-1 to allow growth */} 
+                     <h3 className="text-xl font-semibold mb-2 text-gray-700">Rating & Reviews</h3>
+                     {(item.rating || item.reviews) ? (
+                         <div className="flex items-center text-lg mb-4">
+                            {item.rating && (
+                                <><span className="text-yellow-500 mr-2 text-xl">★</span> <span className="font-semibold mr-1">{Number(item.rating).toFixed(1)}</span></>
+                            )}
+                            {item.reviews && (
+                                <span className="text-gray-600 ml-1">({item.reviews} reviews)</span>
+                            )}
+                         </div>
+                      ) : (
+                        <p className="text-gray-600 italic">No rating information available.</p>
+                      )}
+                  </div>
+
+                   {/* Top Rated Block (Right) */}
+                   <div className="flex-shrink-0"> {/* Prevent shrinking */} 
+                       <h3 className="text-xl font-semibold mb-2 text-gray-700">Top rated by customers</h3>
+                       <div className="relative w-24 h-24"> {/* Sized container for image */} 
+                           <Image 
+                               src="/images/best-rated-pet-clinic.png"
+                               alt="Top Rated Pet Clinic Badge"
+                               fill
+                               style={{ objectFit: 'contain' }} // Use contain or cover as needed
+                           />
+                       </div>
+                   </div>
+              </div>
               
               {/* Details Grid - Contact section removed, only Rating remains */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
