@@ -131,136 +131,152 @@ export default function ItemPage({ item, metaDescription }) {
       <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8 lg:gap-12 max-w-7xl">
           <main className="flex-grow">
             <div className="bg-white p-6 md:p-8 rounded-lg shadow-md border border-gray-200">
-              {/* --- START: Image Section (Fixed Height Container) --- */}
-              {item.imageUrl && (
-                // Container: Using fixed height (e.g., h-80) instead of max-height
-                <div className="w-full h-80 relative mb-6 rounded-md overflow-hidden bg-gray-100"> 
-                  <Image 
-                    src={item.imageUrl}
-                    alt={`${item.name} - Listing in ${item.city}`}
-                    fill 
-                    style={{ objectFit: 'contain' }} // Keep contain
-                    priority={true} 
-                  />
-                </div>
-              )}
-              {/* --- END: Image Section --- */}
-              
-              {/* Title */}
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">{item.name}</h1>
-              
-              {/* City/State Link - Update styles */}
-              {item.city && (
-                  <p className="text-lg text-gray-600 mb-5">
-                      Located in: 
-                      <Link href={`/${item.citySlug}`}>
-                         <span className="hover:underline cursor-pointer font-medium text-primary-600 hover:text-primary-800"> {item.city}</span>
-                      </Link>
-                      {item.state && <span className="text-gray-500">, {item.state}</span>}
-                  </p>
-              )}
-              
-              {/* --- START: Restore Details Grid --- */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
-                  {/* Contact Info */}
-                  <div>
-                      {/* Changed to H3 */}
-                      <h3 className="text-xl font-semibold mb-2 text-gray-700">Contact Information</h3>
-                      {item.street && item.city && item.state && (
-                        <p className="text-base text-gray-800 mb-1 flex items-start"> 
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                            </svg>
-                            <span>{item.street}<br/>{item.city}, {item.state}</span>
-                        </p>
-                      )}
-                      {item.phone && (
-                        <p className="text-base text-gray-800 mb-3 flex items-center"> 
-                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                             <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                           </svg>
-                           {item.phone}
-                        </p>
-                      )}
-                      {item.website && (
-                        <p className="text-base flex items-center"> 
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                             <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
-                          </svg>
-                          <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">Visit Website</a> 
-                        </p>
-                     )}
-                  </div>
-                  {/* Rating/Reviews */}
-                  <div>
-                      {/* Changed to H3 */}
-                     <h3 className="text-xl font-semibold mb-2 text-gray-700">Rating & Reviews</h3>
-                     {(item.rating || item.reviews) ? (
-                         <div className="flex items-center text-lg mb-4">
-                            {item.rating && (
-                                <><span className="text-yellow-500 mr-2 text-xl">★</span> <span className="font-semibold mr-1">{Number(item.rating).toFixed(1)}</span></>
-                            )}
-                            {item.reviews && (
-                                <span className="text-gray-600 ml-1">({item.reviews} reviews)</span>
-                            )}
-                         </div>
-                      ) : (
-                        <p className="text-gray-600 italic">No rating information available.</p>
-                      )}
-                  </div>
-              </div>
-              {/* --- END: Restore Details Grid --- */}
-              
-              {/* MOVED: Description Section moved after Working Hours */}
-              {/* 
-              {item.description && (
-                <div className="mt-6 pt-6 border-t">
-                   <h2 className="text-2xl font-semibold mb-3 text-gray-700">About {item.name}</h2>
-                   <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-                       <ReactMarkdown>{item.description}</ReactMarkdown>
-                   </div>
-                </div>
-              )}
-              */}
+              {/* --- START: Two-Column Layout (Image Left, Details Right) --- */}
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 lg:gap-12 mb-8">
+                
+                {/* Left Column: Image */}
+                <div className="w-full md:w-80 lg:w-96 flex-shrink-0">
+                  {item.imageUrl && (
+                    <div className="w-full aspect-square relative rounded-md overflow-hidden bg-gray-100 border border-gray-200"> 
+                      <Image 
+                        src={item.imageUrl}
+                        alt={`${item.name} - Listing in ${item.city}`}
+                        fill 
+                        style={{ objectFit: 'contain' }} // Keep contain
+                        priority={true} 
+                      />
+                    </div>
+                  )}
+                  {!item.imageUrl && (
+                    // Placeholder for missing image
+                    <div className="w-full aspect-square relative rounded-md overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}> <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /> </svg>
+                    </div>
+                  )}
+                </div> {/* End Left Column */}
 
-               {/* --- START: Updated Working Hours Table --- */}
-              {workingHoursSchedule && (
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h2 className="text-2xl font-semibold mb-4 text-gray-800">Working Hours</h2>
-                   {/* Added Styling */}
-                  <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
-                          <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {dayDisplayOrder.map((day, index) => (
-                          <tr key={day} className={`${index % 2 === 0 ? 'bg-white' : 'bg-primary-50/50'}`}> {/* Alternating row colors */} 
-                            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{day}</td>
-                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{workingHoursSchedule[day] ?? 'Not specified'}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                {/* Right Column: Details */}
+                <div className="flex-grow">
+                  {/* Title */}
+                  <h1 className="text-3xl md:text-4xl font-bold mb-2">{item.name}</h1>
+                  
+                  {/* City/State Link - Update styles */}
+                  {item.city && (
+                      <p className="text-lg text-gray-600 mb-5">
+                          Located in: 
+                          <Link href={`/${item.citySlug}`}>
+                             <span className="hover:underline cursor-pointer font-medium text-primary-600 hover:text-primary-800"> {item.city}</span>
+                          </Link>
+                          {item.state && <span className="text-gray-500">, {item.state}</span>}
+                      </p>
+                  )}
+                  
+                  {/* --- START: Restore Details Grid --- */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
+                      {/* Contact Info */}
+                      <div>
+                          {/* Changed to H3 */}
+                          <h3 className="text-xl font-semibold mb-2 text-gray-700">Contact Information</h3>
+                          {item.street && item.city && item.state && (
+                            <p className="text-base text-gray-800 mb-1 flex items-start"> 
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                </svg>
+                                <span>{item.street}<br/>{item.city}, {item.state}</span>
+                            </p>
+                          )}
+                          {item.phone && (
+                            <p className="text-base text-gray-800 mb-3 flex items-center"> 
+                               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                               </svg>
+                               {item.phone}
+                            </p>
+                          )}
+                          {item.website && (
+                            <p className="text-base flex items-center"> 
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                 <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+                              </svg>
+                              <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">Visit Website</a> 
+                            </p>
+                         )}
+                      </div>
+                      {/* Rating/Reviews */}
+                      <div>
+                          {/* Changed to H3 */}
+                         <h3 className="text-xl font-semibold mb-2 text-gray-700">Rating & Reviews</h3>
+                         {(item.rating || item.reviews) ? (
+                             <div className="flex items-center text-lg mb-4">
+                                {item.rating && (
+                                    <><span className="text-yellow-500 mr-2 text-xl">★</span> <span className="font-semibold mr-1">{Number(item.rating).toFixed(1)}</span></>
+                                )}
+                                {item.reviews && (
+                                    <span className="text-gray-600 ml-1">({item.reviews} reviews)</span>
+                                )}
+                             </div>
+                          ) : (
+                            <p className="text-gray-600 italic">No rating information available.</p>
+                          )}
+                      </div>
                   </div>
-                </div>
-              )}
-              {/* --- END: Updated Working Hours Table --- */}
-              
-               {/* --- START: Description Section (Moved Here) --- */}
-              {item.description && (
-                <div className="mt-8 pt-8 border-t border-gray-200"> {/* Adjusted margin/padding */} 
-                   <h2 className="text-2xl font-semibold mb-4 text-gray-800">About {item.name}</h2> {/* Updated margin */} 
-                   {/* Using prose for nice default typography */}
-                   <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-                       <ReactMarkdown>{item.description}</ReactMarkdown>
-                   </div>
-                </div>
-              )}
-              {/* --- END: Description Section --- */}
+                  {/* --- END: Restore Details Grid --- */}
+                  
+                  {/* MOVED: Description Section moved after Working Hours */}
+                  {/* 
+                  {item.description && (
+                    <div className="mt-6 pt-6 border-t">
+                       <h2 className="text-2xl font-semibold mb-3 text-gray-700">About {item.name}</h2>
+                       <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                           <ReactMarkdown>{item.description}</ReactMarkdown>
+                       </div>
+                    </div>
+                  )}
+                  */}
+
+                   {/* --- START: Updated Working Hours Table --- */}
+                  {workingHoursSchedule && (
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h2 className="text-2xl font-semibold mb-4 text-gray-800">Working Hours</h2>
+                       {/* Added Styling */}
+                      <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
+                              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {dayDisplayOrder.map((day, index) => (
+                              <tr key={day} className={`${index % 2 === 0 ? 'bg-white' : 'bg-primary-50/50'}`}> {/* Alternating row colors */} 
+                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{day}</td>
+                                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{workingHoursSchedule[day] ?? 'Not specified'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                  {/* --- END: Updated Working Hours Table --- */}
+                  
+                   {/* --- START: Description Section (Moved Here) --- */}
+                  {item.description && (
+                    <div className="mt-8 pt-8 border-t border-gray-200"> {/* Adjusted margin/padding */} 
+                       <h2 className="text-2xl font-semibold mb-4 text-gray-800">About {item.name}</h2> {/* Updated margin */} 
+                       {/* Using prose for nice default typography */}
+                       <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                           <ReactMarkdown>{item.description}</ReactMarkdown>
+                       </div>
+                    </div>
+                  )}
+                  {/* --- END: Description Section --- */}
+
+                </div> {/* End Right Column */}
+
+              </div>
+              {/* --- END: Two-Column Layout --- */}
 
             </div>
             {/* Back Link - Update style */}
