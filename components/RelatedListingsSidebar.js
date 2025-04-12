@@ -117,9 +117,9 @@ export default function RelatedListingsSidebar({
   return (
     <aside className="w-full md:w-80 lg:w-96 flex-shrink-0">
       <div className="md:sticky md:top-8 bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        {/* Title can remain dynamic based on context if needed, but let's keep it simple */}
+        {/* Updated Title */}
         <h3 className="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">
-          Related Listings
+          More Pet Clinics Nearby
         </h3>
         <ul className="space-y-4">
           {itemsToDisplay.map((item) => {

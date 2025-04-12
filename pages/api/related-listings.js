@@ -34,59 +34,69 @@ export default function handler(req, res) {
 
   // Basic validation
   if (!citySlug || !currentItemSlug || isNaN(currentLat) || isNaN(currentLon)) {
-    return res.status(400).json({ message: 'Missing or invalid query parameters (citySlug, currentItemSlug, latitude, longitude required)' });
+    return res.status(400).json({ message: 'Missing or invalid query parameters' });
   }
 
   try {
     const allData = getProcessedData();
+    const TARGET_COUNT = 10;
     
-    // Find items in the same city/location, excluding the current item
+    // 1. Find items in the same city, excluding the current item
     const itemsInLocation = allData.allItems.filter(
       item => item.citySlug === citySlug && item.slug !== currentItemSlug
     );
 
-    // Calculate distance for each item
+    // 2. Calculate distance for each item in the same location
     const itemsWithDistance = itemsInLocation.map(item => ({
       ...item,
       distance: calculateDistance(currentLat, currentLon, item.latitude, item.longitude)
     }));
 
-    // Sort by distance (closest first), handling null distances
-    const sortedItems = itemsWithDistance.sort((a, b) => {
+    // 3. Sort nearby items by distance
+    const sortedNearbyItems = itemsWithDistance.sort((a, b) => {
         if (a.distance === null && b.distance === null) return 0; 
         if (a.distance === null) return 1;  
         if (b.distance === null) return -1; 
         return a.distance - b.distance; 
     });
 
-    let relatedListings = sortedItems.slice(0, 5);
+    let combinedListings = [...sortedNearbyItems]; // Start with nearby items
+    const nearbyCount = combinedListings.length;
+    
+    // 4. If we need more items, find random ones
+    if (nearbyCount < TARGET_COUNT) {
+      const needed = TARGET_COUNT - nearbyCount;
+      console.log(`[API /related-listings] Found ${nearbyCount} nearby. Needing ${needed} random items.`);
 
-    // --- START: Fallback to random items if no nearby listings --- 
-    if (relatedListings.length === 0) {
-      console.log(`[API /related-listings] No items found in city ${citySlug}. Falling back to random items.`);
+      // Create a set of slugs already included to avoid duplicates
+      const includedSlugs = new Set(combinedListings.map(item => item.slug));
+      includedSlugs.add(currentItemSlug); // Also exclude the current item itself
+
+      // Filter all items to get potential random candidates
+      const randomCandidates = allData.allItems.filter(item => !includedSlugs.has(item.slug));
       
-      // Get all items again (could optimize by passing allData down if needed)
-      // const allItems = allData.allItems; // Assuming allData is still in scope
-      
-      // Filter out the current item
-      const allOtherItems = allData.allItems.filter(item => item.slug !== currentItemSlug);
-      
-      // Shuffle the array (Fisher-Yates algorithm for better randomness)
-      for (let i = allOtherItems.length - 1; i > 0; i--) {
+      // Shuffle the candidates (Fisher-Yates)
+      for (let i = randomCandidates.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
-          [allOtherItems[i], allOtherItems[j]] = [allOtherItems[j], allOtherItems[i]];
+          [randomCandidates[i], randomCandidates[j]] = [randomCandidates[j], randomCandidates[i]];
       }
       
-      // Take the top 10 random items
-      relatedListings = allOtherItems.slice(0, 10);
-      
-      // Mark these as random (optional, for client-side differentiation if needed)
-      // relatedListings = relatedListings.map(item => ({ ...item, isRandomFallback: true }));
-      console.log(`[API /related-listings] Returning ${relatedListings.length} random fallback items.`);
-    }
-    // --- END: Fallback logic ---
+      // Take the required number of random items
+      const randomFallbackItems = randomCandidates.slice(0, needed);
+       // Add distance property as null or calculate if needed (keeping it simple for now)
+      const randomFallbackItemsWithNullDistance = randomFallbackItems.map(item => ({ ...item, distance: null }));
 
-    res.status(200).json(relatedListings);
+      console.log(`[API /related-listings] Adding ${randomFallbackItemsWithNullDistance.length} random fallback items.`);
+      
+      // Add the random items to the list
+      combinedListings.push(...randomFallbackItemsWithNullDistance);
+    }
+    
+    // 5. Ensure the final list has at most TARGET_COUNT items
+    const finalListings = combinedListings.slice(0, TARGET_COUNT);
+
+    console.log(`[API /related-listings] Returning final list of ${finalListings.length} items.`);
+    res.status(200).json(finalListings);
 
   } catch (error) {
     console.error('[API /related-listings] Error:', error);

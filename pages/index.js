@@ -38,8 +38,8 @@ export async function getStaticProps() {
     const reviewsB = b.reviews ?? 0;
     return reviewsB - reviewsA;
   });
-  // Take top 8 best rated
-  const bestRatedListings = allItems.slice(0, 8); 
+  // Take top 12 best rated for 3 rows of 4
+  const bestRatedListings = allItems.slice(0, 12); 
 
   // --- START: Select and Group Top Cities --- 
   const MIN_LISTINGS_THRESHOLD = 2; // Minimum listings a city needs to be considered
