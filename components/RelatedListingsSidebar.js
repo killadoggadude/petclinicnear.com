@@ -1,103 +1,131 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image'; // Import Image
 
-// --- Haversine Distance Calculation --- 
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) {
-    return null; // Cannot calculate if coordinates are missing
-  }
-
-  function toRad(Value) {
-    return Value * Math.PI / 180;
-  }
-
-  const R = 6371; // km
-  //const R = 3958.8; // miles - Use this line instead if you want miles
-
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  lat1 = toRad(lat1);
-  lat2 = toRad(lat2);
-
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
-  const d = R * c;
-  return d; // Distance in km (or miles if R is changed)
-}
-// ------------------------------------
+// Remove Haversine Distance Calculation - Moved to API
+/*
+function calculateDistance(lat1, lon1, lat2, lon2) { ... }
+*/
 
 export default function RelatedListingsSidebar({ 
-    relatedItems = [], 
+    // Remove relatedItems and allItems props
     currentItemSlug, 
     locationSlug,
-    currentLatitude, // Add props for current coordinates
-    currentLongitude,
-    allItems = [] // New prop to access all listings when needed
+    currentLatitude, 
+    currentLongitude
 }) {
-  // Log coordinates received by the sidebar
-  console.log('Sidebar received current Coords:', { currentLatitude, currentLongitude });
-  
-  const sameLocationItems = relatedItems
-    .filter(i => i.slug !== currentItemSlug)
-    .map(i => {
-        // Log coordinates for each related item being processed
-        console.log(`  Calculating distance for ${i.name}: Current(${currentLatitude}, ${currentLongitude}) vs Item(${i.latitude}, ${i.longitude})`);
-        const distance = calculateDistance(currentLatitude, currentLongitude, i.latitude, i.longitude);
-        // Log the calculated distance
-        console.log(`    -> Calculated Distance: ${distance}`);
-        return {
-            ...i,
-            distance: distance // Use the calculated distance variable
+  // State for fetched items, loading, and errors
+  const [itemsToDisplay, setItemsToDisplay] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Ensure we have the necessary parameters to fetch
+    if (locationSlug && currentItemSlug && currentLatitude != null && currentLongitude != null) {
+      setIsLoading(true);
+      setError(null);
+
+      const fetchData = async () => {
+        try {
+          const apiUrl = `/api/related-listings?citySlug=${encodeURIComponent(locationSlug)}&currentItemSlug=${encodeURIComponent(currentItemSlug)}&latitude=${currentLatitude}&longitude=${currentLongitude}`;
+          const response = await fetch(apiUrl);
+          
+          if (!response.ok) {
+            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+          }
+          
+          const data = await response.json();
+          setItemsToDisplay(data || []); // API returns the sorted list
+          
+        } catch (err) {
+          console.error("Error fetching related listings:", err);
+          setError("Could not load related listings.");
+          setItemsToDisplay([]); // Clear items on error
+        } finally {
+          setIsLoading(false);
         }
-    })
-    .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)); // Sort by distance, closest first
-  
-  // If no items in the same location, grab random items from all items
+      };
+
+      fetchData();
+      
+    } else {
+      // If required props aren't available, don't fetch
+      setIsLoading(false);
+      setItemsToDisplay([]);
+    }
+    // Dependency array includes all props needed for the API call
+  }, [locationSlug, currentItemSlug, currentLatitude, currentLongitude]);
+
+  // Remove the filtering/sorting logic that was here
+  /*
+  const sameLocationItems = relatedItems.filter(...).map(...).sort(...);
   let itemsToDisplay = sameLocationItems;
-  
-  if (itemsToDisplay.length === 0 && allItems.length > 0) {
-    // If no same-location items but we have all items, select random ones
-    const randomItems = allItems
-      .filter(i => i.slug !== currentItemSlug) // Exclude current item
-      .map(i => {
-        // Log coordinates for each random item being processed
-        console.log(`  Calculating distance for RANDOM ${i.name}: Current(${currentLatitude}, ${currentLongitude}) vs Item(${i.latitude}, ${i.longitude})`);
-        const distance = calculateDistance(currentLatitude, currentLongitude, i.latitude, i.longitude);
-        // Log the calculated distance
-        console.log(`    -> Calculated Distance (Random): ${distance}`);
-        return {
-            ...i,
-            distance: distance
-        }
-      })
-      .sort(() => 0.5 - Math.random()) // Shuffle array
-      .slice(0, 5); // Take first 5 random items
-    
-    itemsToDisplay = randomItems;
-  }
-  
-  // Final limit to 5 items
+  if (itemsToDisplay.length === 0 && allItems.length > 0) { ... }
   itemsToDisplay = itemsToDisplay.slice(0, 5);
+  */
 
-  // If still no items, return null
-  if (itemsToDisplay.length === 0) {
-    return null; 
+  // Render Loading State
+  if (isLoading) {
+    return (
+      <aside className="w-full md:w-80 lg:w-96 flex-shrink-0">
+        <div className="md:sticky md:top-8 bg-white p-6 rounded-lg shadow-md border border-gray-200">
+          <h3 className="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">Loading Listings...</h3>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-start gap-3 animate-pulse">
+                <div className="w-16 h-16 flex-shrink-0 rounded bg-gray-200"></div>
+                <div className="flex-grow space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-full"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </aside>
+    );
   }
 
+  // Render Error State
+  if (error) {
+     return (
+      <aside className="w-full md:w-80 lg:w-96 flex-shrink-0">
+        <div className="md:sticky md:top-8 bg-white p-6 rounded-lg shadow-md border border-gray-200">
+          <h3 className="text-xl font-semibold mb-4 border-b pb-2 text-red-600">Error</h3>
+          <p className="text-sm text-red-500">{error}</p>
+        </div>
+      </aside>
+    );   
+  }
+
+  // Render No Results State
+  if (itemsToDisplay.length === 0) {
+    // Optionally render nothing or a specific message if no related items are found
+    // return null; 
+     return (
+      <aside className="w-full md:w-80 lg:w-96 flex-shrink-0">
+        <div className="md:sticky md:top-8 bg-white p-6 rounded-lg shadow-md border border-gray-200">
+          <h3 className="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">Related Listings</h3>
+          <p className="text-sm text-gray-500">No other listings found nearby.</p>
+        </div>
+      </aside>
+    ); 
+  }
+
+  // Render the list of items fetched from the API
   return (
     <aside className="w-full md:w-80 lg:w-96 flex-shrink-0">
       <div className="md:sticky md:top-8 bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        <h3 className="text-xl font-semibold mb-4 border-b pb-2">
-          {sameLocationItems.length > 0 ? "Also in this Location" : "You might also like"}
+        {/* Title can remain dynamic based on context if needed, but let's keep it simple */}
+        <h3 className="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">
+          Related Listings
         </h3>
         <ul className="space-y-4">
           {itemsToDisplay.map((item) => {
-            // Log distance calculated for item before display
-            console.log(`  Displaying ${item.name} with distance: ${item.distance}, Type: ${typeof item.distance}`);
-            const distanceDisplay = typeof item.distance === 'number' // Check if distance is a valid number
-                ? `${item.distance.toFixed(1)} km away` // Adjust 'km' to 'miles' if needed
+            // Distance is now calculated by the API (in miles)
+            const distanceDisplay = typeof item.distance === 'number' 
+                ? `${item.distance.toFixed(1)} miles away` 
                 : null;
             
             return (
@@ -122,9 +150,9 @@ export default function RelatedListingsSidebar({
                     
                     <div className="flex-grow">
                         <Link href={`/${item.citySlug}/${item.slug}`}>
-                            <span className="text-blue-600 hover:text-blue-800 hover:underline text-base font-medium block mb-0.5">
+                             <span className="text-blue-600 hover:text-blue-800 hover:underline text-base font-medium block mb-0.5">
                             {item.name}
-                            </span>
+                             </span>
                         </Link>
                         <p className="text-sm text-gray-500 leading-tight mb-1 flex items-start">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 mt-0.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -133,11 +161,11 @@ export default function RelatedListingsSidebar({
                            <span>{item.street}, {item.city}</span>
                         </p>
                         
-                        {/* Add Rating and Reviews Count */}
+                        {/* Rating and Reviews Count */}
                         {(item.rating || item.reviews) && (
                             <div className="flex items-center text-sm text-gray-500 mb-1">
                                 {item.rating && (
-                                    <span className="text-yellow-500 mr-1">★ {item.rating.toFixed(1)}</span>
+                                    <span className="text-yellow-500 mr-1">★ {Number(item.rating).toFixed(1)}</span>
                                 )}
                                 {item.reviews && (
                                     <span className="ml-1">({item.reviews} reviews)</span>
@@ -145,11 +173,11 @@ export default function RelatedListingsSidebar({
                             </div>
                         )}
 
-                        {/* Highlighted Distance */}
+                        {/* Distance Display (from API) */}
                         {distanceDisplay && (
-                            <p className="text-sm font-semibold text-teal-600 bg-teal-50 inline-block px-1.5 py-0.5 rounded mt-1">
+                             <p className="text-sm font-semibold text-teal-600 bg-teal-50 inline-block px-1.5 py-0.5 rounded mt-1">
                                 {distanceDisplay}
-                            </p>
+                             </p>
                         )}
                     </div>
                 </li>
