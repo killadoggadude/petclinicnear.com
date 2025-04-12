@@ -156,7 +156,7 @@ function FaqItem({ question, answer, isOpen, onToggle }) {
 export default function Home({ allItems, bestRatedListings, topCityColumns, totalItemCount }) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [openFaqIndex, setOpenFaqIndex] = useState(null);
+  const [openFaqStates, setOpenFaqStates] = useState({});
   const baseUrl = "https://petclinicnear.com"; // Updated domain
 
   // Effect to check URL query parameter on load
@@ -211,8 +211,12 @@ export default function Home({ allItems, bestRatedListings, topCityColumns, tota
     { question: "Does this directory include mobile veterinarians?", answer: "Our current focus is on physical clinic locations. While some listed clinics might offer house calls, we don't specifically filter for mobile-only vets at this time. We recommend searching online specifically for 'mobile veterinarians' in your area if needed." },
   ];
 
+  // Updated toggle handler for independent states
   const handleFaqToggle = (index) => {
-    setOpenFaqIndex(openFaqIndex === index ? null : index); // Toggle: open clicked, close others
+    setOpenFaqStates(prevStates => ({
+      ...prevStates,
+      [index]: !prevStates[index] // Toggle the boolean state for the clicked index
+    }));
   };
 
   const showSearchResults = searchQuery.trim().length > 0;
@@ -413,16 +417,17 @@ export default function Home({ allItems, bestRatedListings, topCityColumns, tota
                     </section>
                 )}
 
-                {/* FAQ Section - Render the faqs array (grid handles layout) */}
+                {/* FAQ Section - Updated to use independent state */}
                 <section className="mt-16 pt-12 border-t border-gray-200">
                     <h2 className="text-3xl font-semibold mb-8 text-center text-gray-800">Frequently Asked Questions</h2>
-                     <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6"> 
                         {faqs.map((faq, index) => (
                              <FaqItem 
                                key={index} 
                                question={faq.question} 
                                answer={faq.answer} 
-                               isOpen={openFaqIndex === index}
+                               // Check the state for this specific index
+                               isOpen={!!openFaqStates[index]} 
                                onToggle={() => handleFaqToggle(index)}
                              />
                         ))}

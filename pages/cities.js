@@ -1,32 +1,30 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import fs from 'fs'
-import path from 'path'
 import Breadcrumbs from '../components/Breadcrumbs' // Adjust path if needed
 
-// Helper function to read the processed data
-function getProcessedData() {
-  const dataPath = path.join(process.cwd(), 'data', 'processed_data.json');
+export async function getStaticProps() {
+  // Require fs and path here
+  const fs = require('fs');
+  const path = require('path');
+
+  let cities = [];
+  let allItems = [];
+
   try {
-      const jsonData = fs.readFileSync(dataPath);
-      const data = JSON.parse(jsonData);
-      // Read the top-level cities array
-      return { cities: data.cities || [] }; 
+      const dataPath = path.join(process.cwd(), 'data', 'processed_data.json');
+      const jsonData = fs.readFileSync(dataPath, 'utf-8'); // Specify encoding
+      const processedData = JSON.parse(jsonData);
+      cities = processedData?.cities || [];
+      allItems = processedData?.allItems || []; // Get allItems
   } catch (error) {
       console.error("Error reading processed data for cities page:", error);
-      // Return empty cities array on error
-      return { cities: [] }; 
+      // Handle error appropriately, maybe return empty props
   }
-}
-
-export async function getStaticProps() {
-  const data = getProcessedData();
-  const allCities = data.cities; 
 
   // --- Group cities by state --- 
   const statesMap = {};
-  allCities.forEach(city => {
-    const stateName = city.state || 'Unknown State'; // Use state name from city object
+  cities.forEach(city => {
+    const stateName = city.state || 'Unknown State';
     if (!statesMap[stateName]) {
       statesMap[stateName] = { name: stateName, cities: [] };
     }
@@ -34,7 +32,7 @@ export async function getStaticProps() {
         name: city.name, 
         slug: city.slug, 
         itemCount: typeof city.itemCount === 'number' ? city.itemCount : 0,
-        stateName: city.state // Keep state name if needed, though parent has it
+        stateName: city.state
     });
   });
   const statesWithCities = Object.values(statesMap).sort((a, b) => a.name.localeCompare(b.name));
@@ -43,33 +41,33 @@ export async function getStaticProps() {
   });
   // --- End Grouping ---
 
-  const totalCityCount = allCities.length;
+  const totalCityCount = cities.length;
+  const totalItemCount = allItems.length; // Calculate total items
 
   return {
     props: {
-      // Pass the grouped structure and total count
       statesWithCities: statesWithCities, 
       totalCityCount: totalCityCount,
-      // Remove the flat cities list
-      // cities: allCities, 
+      totalItemCount: totalItemCount, // Pass totalItemCount
     },
   }
 }
 
-export default function AllCitiesPage({ statesWithCities, totalCityCount }) {
+export default function AllCitiesPage({ statesWithCities, totalCityCount, totalItemCount }) { // Add totalItemCount prop
   const breadcrumbs = [
     { name: 'Home', href: '/' },
-    { name: 'All Cities', href: null }, // Current page
+    { name: 'All Cities', href: null }, 
   ];
 
   return (
     <>
       <Head>
-        <title>All Cities - Directory</title>
-        <meta name="description" content="Browse listings by city across all states." />
+        {/* Update title dynamically? */}
+        <title>All {totalCityCount} Cities - Pet Clinic Directory</title>
+        <meta name="description" content={`Browse listings across ${totalCityCount} cities and ${totalItemCount} pet clinics.`} />
       </Head>
 
-      {/* Top Hero (Breadcrumbs only) - Apply light gray gradient */}
+      {/* Top Hero (Breadcrumbs only) */}
       <div className="bg-gradient-to-r from-gray-50 via-gray-100 to-gray-200 py-8 px-4 border-b border-gray-200">
         <div className="container mx-auto max-w-7xl">
           <Breadcrumbs crumbs={breadcrumbs} />
@@ -79,7 +77,8 @@ export default function AllCitiesPage({ statesWithCities, totalCityCount }) {
       {/* Reverted Hero Section */}
       <div className="bg-white py-10 px-4 border-b border-gray-200">
         <div className="container mx-auto max-w-7xl text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">Best {totalCityCount} Pet Clinics by City</h1>
+          {/* Update H1 with both counts */}
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">Best {totalItemCount} Pet Clinics in {totalCityCount} Cities</h1>
           <p className="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">
             Find trusted pet clinics and veterinary services across numerous cities. Explore options in your area using the list below.
           </p>
