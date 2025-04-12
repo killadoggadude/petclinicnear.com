@@ -1,8 +1,6 @@
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Head from 'next/head';
-import fs from 'fs';
-import path from 'path';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
@@ -12,70 +10,8 @@ const Breadcrumbs = dynamic(() => import('../../components/Breadcrumbs'), { ssr:
 const GoogleMapComponent = dynamic(() => import('../../components/GoogleMapComponent'), { ssr: false });
 const RelatedListingsSidebar = dynamic(() => import('../../components/RelatedListingsSidebar'), { ssr: false });
 
-// --- START: Add Working Hours Parsing Logic ---
-// Placeholder: Assuming item.workingHours is a string like:
-// "Mon: 9am-5pm | Tue: 9am-5pm | Wed: 9am-1pm | Thu: 9am-5pm | Fri: 9am-5pm | Sat: 10am-2pm | Sun: Closed"
-// We need to parse this string into a more usable format.
-
-function parseWorkingHours(hoursString) {
-  // Log the input received
-  console.log("[parseWorkingHours] Input:", hoursString);
-  
-  if (!hoursString || typeof hoursString !== 'string') {
-    console.log("[parseWorkingHours] Returning null due to invalid input type or empty string.");
-    return null;
-  }
-  
-  const days = hoursString.split('|').map(dayEntry => dayEntry.trim());
-  const schedule = {};
-  const dayOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-  days.forEach(dayEntry => {
-    const parts = dayEntry.split(':');
-    if (parts.length >= 2) {
-      const day = parts[0].trim();
-      const time = parts.slice(1).join(':').trim(); // Handle times like "10:30am-..."
-      if (dayOrder.includes(day)) {
-        schedule[day] = time;
-      } else {
-         console.log(`[parseWorkingHours] Skipping entry with unrecognized day: ${day}`);
-      }
-    } else {
-        console.log(`[parseWorkingHours] Skipping entry, couldn't split by colon: ${dayEntry}`);
-    }
-  });
-  
-  // Ensure all days are present, even if closed
-  dayOrder.forEach(day => {
-    if (!schedule[day]) {
-      schedule[day] = 'Closed'; // Default if day is missing
-    }
-  });
-
-  // Log the final parsed schedule
-  console.log("[parseWorkingHours] Output Schedule:", schedule);
-  return schedule; // Returns { Mon: "9am-5pm", Tue: "...", ... }
-}
-// --- END: Add Working Hours Parsing Logic ---
-
-// --- START: Add back getProcessedData function ---
-function getProcessedData() {
-  const dataPath = path.join(process.cwd(), 'data', 'processed_data.json');
-  try {
-      const jsonData = fs.readFileSync(dataPath);
-      const data = JSON.parse(jsonData);
-      // Return the structure expected by getStaticPaths/Props
-      return {
-          cities: data.cities || [], 
-          allItems: data.allItems || [], 
-          categories: data.categories || [] // Keep for consistency, even if not used here
-      };
-  } catch (error) {
-      console.error("[getProcessedData] Error reading data:", error);
-      return { cities: [], allItems: [], categories: [] }; 
-  }
-}
-// --- END: Add back getProcessedData function ---
+// Define the desired display order for days
+const dayDisplayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export default function ItemPage({ item, metaDescription }) {
   const router = useRouter();
@@ -91,8 +27,10 @@ export default function ItemPage({ item, metaDescription }) {
       return <div>Item data not found.</div>;
   }
 
-  // Parse working hours
-  const workingHoursSchedule = parseWorkingHours(item.workingHours);
+  // Working hours schedule is now directly available as item.workingHours (if it exists and is an object)
+  const workingHoursSchedule = (item.workingHours && typeof item.workingHours === 'object' && !Array.isArray(item.workingHours)) 
+      ? item.workingHours 
+      : null;
 
   // Define breadcrumbs *after* the item check
   const breadcrumbs = [
@@ -282,7 +220,7 @@ export default function ItemPage({ item, metaDescription }) {
               )}
               {/* --- END: Restore Description Section --- */}
 
-              {/* --- START: Add Working Hours Table --- */}
+              {/* --- START: Updated Working Hours Table --- */}
               {workingHoursSchedule && (
                 <div className="mt-6 pt-6 border-t">
                   <h2 className="text-2xl font-semibold mb-4 text-gray-700">Working Hours</h2>
@@ -295,10 +233,10 @@ export default function ItemPage({ item, metaDescription }) {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {Object.entries(workingHoursSchedule).map(([day, hours]) => (
+                        {dayDisplayOrder.map((day) => (
                           <tr key={day}>
                             <td className="px-4 py-2 font-medium text-gray-800">{day}</td>
-                            <td className="px-4 py-2 text-gray-700">{hours}</td>
+                            <td className="px-4 py-2 text-gray-700">{workingHoursSchedule[day] ?? 'Not specified'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -306,7 +244,7 @@ export default function ItemPage({ item, metaDescription }) {
                   </div>
                 </div>
               )}
-              {/* --- END: Add Working Hours Table --- */}
+              {/* --- END: Updated Working Hours Table --- */}
 
             </div>
             {/* Back Link - Update style */}
@@ -340,30 +278,16 @@ export default function ItemPage({ item, metaDescription }) {
   );
 }
 
-// Build-time path generation - Add back getStaticPaths
+// Build-time path generation - Use fallback: 'blocking'
 export async function getStaticPaths() {
-  // const data = getProcessedData(); // No longer need to read all data here
-  // const paths = []; // No longer pre-generating paths
-  // data.allItems.forEach(item => {
-  //   // Ensure item has citySlug and item slug
-  //   if(item.citySlug && item.slug) {
-  //       paths.push({
-  //           params: {
-  //             citySlug: item.citySlug,
-  //             itemSlug: item.slug
-  //           },
-  //       });
-  //   } else {
-  //       console.warn(`[getStaticPaths /itemSlug] Skipping path generation for item due to missing slugs: ${item.name}`);
-  //   }
-  // });
-  // console.log(`[getStaticPaths /itemSlug] Generated ${paths.length} item paths.`);
-  // Return an empty paths array and set fallback to 'blocking'
-  return { paths: [], fallback: 'blocking' }
+  return { paths: [], fallback: 'blocking' };
 }
 
 // Build-time data fetching - Use city/item slugs
 export async function getStaticProps({ params }) {
+  // Add back the require statement for getProcessedData
+  const { getProcessedData } = require('../../lib/data');
+  
   // Log received params
   console.log(`[getStaticProps /itemSlug] Received params:`, params);
 
@@ -389,12 +313,11 @@ export async function getStaticProps({ params }) {
 
   console.log(`[getStaticProps /itemSlug] Found item: ${currentItem.name}`);
 
-  // Removed category lookup
-  const metaDescription = `Find details for ${currentItem.name}, a business located in ${currentItem.city}${currentItem.state ? `, ${currentItem.state}`: ''}. Contact information, services, and more.`;
+  const metaDescription = `Find details for ${currentItem.name}, a pet clinic located in ${currentItem.city}${currentItem.state ? `, ${currentItem.state}`: ''}. Contact information, address, rating, and working hours.`;
 
   return {
     props: {
-      item: JSON.parse(JSON.stringify(currentItem)), // Pass only the specific item
+      item: JSON.parse(JSON.stringify(currentItem)),
       metaDescription: metaDescription,
     },
   }

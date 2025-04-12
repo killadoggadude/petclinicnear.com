@@ -176,14 +176,35 @@ async function main() {
         itemData.latitude = record[LATITUDE_HEADER]; 
         itemData.longitude = record[LONGITUDE_HEADER]; 
         itemData.imageUrl = record[IMAGE_URL_HEADER] || null;
-        itemData.workingHours = record[WORKING_HOURS_HEADER] || null;
+        
+        // Try parsing Working Hours as JSON
+        let parsedHours = null;
+        const hoursString = record[WORKING_HOURS_HEADER];
+        if (hoursString && typeof hoursString === 'string') {
+            try {
+                // Attempt to parse the string as JSON
+                parsedHours = JSON.parse(hoursString);
+                // Optional basic validation: check if it's an object
+                if (typeof parsedHours !== 'object' || parsedHours === null) {
+                    console.warn(`[parse-csv] Working Hours for "${itemName}" parsed but is not an object.`);
+                    parsedHours = null;
+                } else {
+                    // Ensure keys like 'Monday', 'Tuesday' exist if needed, or handle variations
+                }
+            } catch (e) {
+                // Log if parsing fails, indicating unexpected format
+                console.warn(`[parse-csv] Failed to parse Working Hours JSON for item "${itemName}". Expected JSON object string. Error: ${e.message}`);
+                parsedHours = null;
+            }
+        }
+        itemData.workingHours = parsedHours; // Assign the parsed object or null
+        
         itemData.description = record[DESCRIPTION_HEADER] || null; 
         
         // Clean up keys based on original headers (might be redundant now)
         delete itemData.businessName; // If key became businessName
         delete itemData.numberOfReviews; // If key became numberOfReviews
         delete itemData.imageURL; // If key became imageURL
-        delete itemData.workingHours; // Keep camelCase, delete potential snake_case if generated
         
         // Add item to city list and flat list
         cityMap[citySlug].items.push(itemData);
