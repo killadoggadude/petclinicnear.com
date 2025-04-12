@@ -38,6 +38,17 @@ function Footer() {
         <div className="text-center text-gray-400 text-sm mt-6 pt-6 border-t border-gray-700">
           &copy; {currentYear} Directory. All rights reserved.
         </div>
+        <div className="mt-8 md:mt-0 md:order-1">
+          <p className="text-center text-xs leading-5 text-gray-500">
+            &copy; {new Date().getFullYear()} Directory. All rights reserved.
+          </p>
+          {/* Add Sitemap Link */}
+          <p className="text-center text-xs leading-5 text-gray-500 mt-1">
+            <Link href="/sitemap.xml">
+              <span className="hover:text-gray-700 hover:underline">Sitemap</span>
+            </Link>
+          </p>
+        </div>
       </div>
     </footer>
   );

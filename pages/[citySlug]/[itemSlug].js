@@ -305,8 +305,8 @@ export default function ItemPage({ item, metaDescription }) {
               {item.description && (
                 <div className="mt-8 pt-8 border-t border-gray-200"> {/* Adjusted margin/padding */} 
                    <h2 className="text-2xl font-semibold mb-4 text-gray-800">About {item.name}</h2> {/* Updated margin */} 
-                   {/* Using prose for nice default typography */}
-                   <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                   {/* Changed prose-lg to prose for smaller text */}
+                   <div className="prose max-w-none text-gray-700 leading-relaxed">
                        <ReactMarkdown>{item.description}</ReactMarkdown>
                    </div>
                 </div>

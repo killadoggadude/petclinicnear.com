@@ -1,89 +1,77 @@
 const fs = require('fs');
 const path = require('path');
 
-// --- Configuration --- 
-const BASE_URL = 'https://www.yourdomain.com'; // !! IMPORTANT: Replace with your actual domain !!
-const OUTPUT_DIR = path.join(__dirname, '../out'); // The output directory after 'next build'
-const SITEMAP_PATH = path.join(OUTPUT_DIR, 'sitemap.xml');
+// Define the paths
 const DATA_PATH = path.join(__dirname, '../data/processed_data.json');
+const SITEMAP_PATH = path.join(__dirname, '../public/sitemap.xml');
+const BASE_URL = 'https://petclinicnear.com'; // Your website's base URL
 
-// --- Helper Functions --- 
-function getDate() {
-    // Get current date in YYYY-MM-DD format
-    return new Date().toISOString().split('T')[0];
-}
-
-function generateUrlEntry(url, changefreq = 'weekly', priority = 0.7) {
-    return `
-  <url>
-    <loc>${url}</loc>
-    <lastmod>${getDate()}</lastmod>
-    <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>
-  </url>`;
-}
-
-// --- Main Generation Logic --- 
-async function generateSitemap() {
+function generateSitemap() {
     console.log('Generating sitemap...');
 
-    let data;
+    // Read processed data
+    let processedData;
     try {
-        const jsonData = fs.readFileSync(DATA_PATH, 'utf8');
-        data = JSON.parse(jsonData);
+        const jsonData = fs.readFileSync(DATA_PATH, 'utf-8');
+        processedData = JSON.parse(jsonData);
     } catch (error) {
         console.error(`Error reading processed data file at ${DATA_PATH}:`, error);
         process.exit(1);
     }
 
-    const allItems = data.allItems || [];
-    const locations = data.locations || [];
+    const { cities = [], allItems = [] } = processedData;
+    const currentDate = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD
 
-    let sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+    // Start XML string
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+`;
 
-    // 1. Static Pages
-    sitemapContent += generateUrlEntry(`${BASE_URL}/`, 'daily', 1.0); // Homepage
-    sitemapContent += generateUrlEntry(`${BASE_URL}/cities`, 'weekly', 0.8); // All locations page
-    sitemapContent += generateUrlEntry(`${BASE_URL}/about`, 'monthly', 0.5);
-    sitemapContent += generateUrlEntry(`${BASE_URL}/contact`, 'monthly', 0.5);
-    sitemapContent += generateUrlEntry(`${BASE_URL}/terms`, 'monthly', 0.3);
-    // Add other static pages like /privacy here if you create them
+    // Helper to add a URL entry
+    const addUrl = (loc, lastmod = currentDate, changefreq = 'weekly', priority = 0.8) => {
+        // Basic URL encoding/escaping - replace special characters
+        const escapedLoc = loc.replace(/&/g, '&amp;').replace(/'/g, '&apos;').replace(/"/g, '&quot;').replace(/>/g, '&gt;').replace(/</g, '&lt;');
+        xml += `  <url>
+    <loc>${escapedLoc}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>
+`;
+    };
 
-    // 2. Location (City) Pages
-    locations.forEach(location => {
-        const url = `${BASE_URL}/${location.slug}`;
-        sitemapContent += generateUrlEntry(url, 'weekly', 0.8);
-    });
+    // Add Homepage (higher priority)
+    addUrl(BASE_URL, currentDate, 'daily', 1.0);
 
-    // 3. Item (Plumber) Pages
-    allItems.forEach(item => {
-        // Ensure required slugs exist before generating URL
-        if (item.locationSlug && item.slug) { 
-            const url = `${BASE_URL}/${item.locationSlug}/${item.slug}`;
-            sitemapContent += generateUrlEntry(url, 'monthly', 0.6);
-        } else {
-            console.warn(`Skipping sitemap entry for item due to missing slugs: ${item.name}`);
+    // Add /cities page
+    addUrl(`${BASE_URL}/cities`, currentDate, 'weekly', 0.9);
+
+    // Add City Pages
+    cities.forEach(city => {
+        if (city.slug) {
+            addUrl(`${BASE_URL}/${city.slug}`, currentDate, 'weekly', 0.8);
         }
     });
 
-    sitemapContent += `
-</urlset>`;
+    // Add Item Pages
+    allItems.forEach(item => {
+        if (item.citySlug && item.slug) {
+            addUrl(`${BASE_URL}/${item.citySlug}/${item.slug}`, currentDate, 'monthly', 0.7);
+        }
+    });
 
-    // Ensure output directory exists
-    if (!fs.existsSync(OUTPUT_DIR)) {
-        console.warn(`Output directory ${OUTPUT_DIR} does not exist. Creating...`);
-        fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-    }
+    // End XML string
+    xml += `</urlset>`;
 
-    // Write the sitemap file
+    // Write sitemap file
     try {
-        fs.writeFileSync(SITEMAP_PATH, sitemapContent);
-        console.log(`Sitemap successfully generated at ${SITEMAP_PATH}`);
+        fs.writeFileSync(SITEMAP_PATH, xml);
+        console.log(`Sitemap successfully generated at ${SITEMAP_PATH} with ${2 + cities.length + allItems.length} URLs.`);
     } catch (error) {
-        console.error(`Error writing sitemap file:`, error);
+        console.error(`Error writing sitemap file at ${SITEMAP_PATH}:`, error);
         process.exit(1);
     }
 }
 
+// Run the function
 generateSitemap(); 

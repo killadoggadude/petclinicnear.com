@@ -28,7 +28,7 @@ export default function GoogleMapComponent({ latitude, longitude, name, address 
   }
 
   return (
-    <div className="w-full h-full mb-4">
+    <div className="w-full h-full">
       <div className="relative bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-sm w-full h-full">
         {/* Map Iframe using OpenStreetMap */}
         <div className="w-full h-full relative">
