@@ -1,5 +1,5 @@
 // Import the shared data fetching utility
-import { getProcessedData } from '../../../lib/data';
+import { getProcessedData } from '../../../../lib/data';
 
 export default function handler(req, res) {
   // Extract the citySlug from the query parameters
