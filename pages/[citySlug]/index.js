@@ -2,8 +2,6 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useMemo, useEffect } from 'react';
-import fs from 'fs'
-import path from 'path'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
 // Ensure imports are up TWO levels
@@ -15,25 +13,6 @@ import dynamic from 'next/dynamic'
 const Breadcrumbs = dynamic(() => import('../../components/Breadcrumbs'), { ssr: false });
 const FilterSidebar = dynamic(() => import('../../components/FilterSidebar'), { ssr: false });
 const SearchFilterBar = dynamic(() => import('../../components/SearchFilterBar'), { ssr: false });
-
-// Helper function - Revert to reading cities
-function getProcessedData() {
-  const dataPath = path.join(process.cwd(), 'data', 'processed_data.json');
-  try {
-      const jsonData = fs.readFileSync(dataPath);
-      const data = JSON.parse(jsonData);
-      // Use the cities structure
-      return {
-          cities: data.cities || [], 
-          allItems: data.allItems || [],
-          categories: data.categories || [] // Keep for consistency
-      };
-  } catch (error) {
-      console.error("Error reading processed data:", error);
-      return { cities: [], allItems: [], categories: [] }; 
-  }
-}
-
 
 // Build-time path generation - Use cities
 export async function getStaticPaths() {
@@ -51,6 +30,8 @@ export async function getStaticPaths() {
 
 // Build-time data fetching - Use citySlug only
 export async function getStaticProps({ params }) {
+  // Import getProcessedData ONLY here
+  const { getProcessedData } = await import('../../lib/data'); 
   const data = getProcessedData();
   const { citySlug } = params;
 
