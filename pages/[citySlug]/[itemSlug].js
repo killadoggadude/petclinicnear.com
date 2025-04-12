@@ -306,13 +306,15 @@ export default function ItemPage({ item, metaDescription }) {
           </main>
           {/* ... Sidebar ... */}
           <aside className="w-full md:w-80 lg:w-96 flex-shrink-0 space-y-6">
-            {/* Use Dynamic Map */}
-            <GoogleMapComponent 
-              latitude={item.latitude}
-              longitude={item.longitude}
-              name={item.name}
-              address={`${item.street}, ${item.city}, ${item.state}`}
-            />
+            {/* Wrap map in a div with explicit height matching width */}
+            <div className="w-full h-auto aspect-square md:h-80 lg:h-96"> {/* Use aspect-square for responsiveness */} 
+              <GoogleMapComponent 
+                latitude={item.latitude}
+                longitude={item.longitude}
+                name={item.name}
+                address={`${item.street}, ${item.city}, ${item.state}`}
+              />
+            </div>
             {/* Use Dynamic Sidebar */}
              <RelatedListingsSidebar 
               currentItemSlug={item.slug}   

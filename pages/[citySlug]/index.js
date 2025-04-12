@@ -211,87 +211,91 @@ export default function CityPage({ city }) {
             ) : error ? (
                  <p className="text-center text-red-500 py-10">{error}</p>
             ) : filteredItems.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {paginatedItems.map((item) => (
-                  <div key={item.slug} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 flex flex-col">
-                    {/* --- START: Simplify Image Section Styling for Testing --- */}
-                    {item.imageUrl && (
-                      <Link href={`/${item.citySlug}/${item.slug}`} 
-                            // Use fixed height, remove aspect ratio and sizes
-                            className="relative block w-full flex-shrink-0 overflow-hidden h-48"> 
-                        <Image 
-                          src={item.imageUrl}
-                          alt={`${item.name}`}
-                          fill 
-                          style={{ objectFit: 'cover' }} 
-                          // Remove sizes prop for this test
-                          // sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" 
-                        />
-                      </Link>
-                    )}
-                    {/* --- END: Simplify Image Section Styling --- */}
-                    
-                    {/* Details Section */} 
-                    <div className="p-4 sm:p-5 flex-grow flex flex-col justify-between">
-                      {/* Top part: Name, Address, Phone, City Tag */}
-                      <div>
-                        {/* Update City Tag */}
-                        {item.city && (
-                            <div className="mb-2 self-start">
-                                <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                                   {item.city}
-                                </span>
-                            </div>
-                        )}
-                        {/* Change H2 to H3, keep visual style */}
-                        <h3 className="text-xl font-semibold mb-1">
-                          <Link href={`/${item.citySlug}/${item.slug}`}>
-                            <span className="text-gray-800 hover:text-primary transition-colors duration-150">
-                              {item.name}
-                            </span>
-                          </Link>
-                        </h3>
-                        {/* Address */}
-                        <p className="text-gray-600 text-sm mb-1 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                            </svg>
-                            {item.street || 'Address not specified'}, {item.city}
-                        </p>
-                        {/* Phone */}
-                        {item.phone && (
-                          <p className="text-gray-600 text-sm mb-3 flex items-center">
-                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                               <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                             </svg>
-                             {item.phone}
-                          </p>
-                        )}
-                      </div>
-                      {/* Bottom: Rating/Reviews and View Details */} 
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 pt-3 border-t border-gray-100">
-                           {/* Rating/Reviews */}
-                           <div className="flex items-center text-sm text-gray-600 mb-2 sm:mb-0 order-2 sm:order-1">
-                               {item.rating ? (
-                                   <span className="text-yellow-500 mr-1">★ {Number(item.rating).toFixed(1)}</span>
-                               ) : (
-                                   <span className="text-gray-400 mr-1">★ N/A</span>
-                               )}
-                               <span className="ml-1">({item.reviews || 0} reviews)</span>
-                           </div>
-                           {/* View Details Button */}
-                           <Link href={`/${item.citySlug}/${item.slug}`} className="order-1 sm:order-2">
-                             <span className="inline-block bg-primary-100 text-primary-700 hover:bg-primary-200 text-sm font-medium py-1.5 px-4 rounded-md transition duration-150 ease-in-out self-start sm:self-auto">
-                                  View Details
+              // Wrap grid and pagination in a fragment or div if needed
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {paginatedItems.map((item) => (
+                    <div key={item.slug} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 flex flex-col">
+                      {/* --- START: Simplify Image Section Styling for Testing --- */}
+                      {item.imageUrl && (
+                        <Link href={`/${item.citySlug}/${item.slug}`} 
+                              // Use fixed height, remove aspect ratio and sizes
+                              className="relative block w-full flex-shrink-0 overflow-hidden h-48"> 
+                          <Image 
+                            src={item.imageUrl}
+                            alt={`${item.name}`}
+                            fill 
+                            style={{ objectFit: 'cover' }} 
+                            // Remove sizes prop for this test
+                            // sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" 
+                          />
+                        </Link>
+                      )}
+                      {/* --- END: Simplify Image Section Styling --- */}
+                      
+                      {/* Details Section */} 
+                      <div className="p-4 sm:p-5 flex-grow flex flex-col justify-between">
+                        {/* Top part: Name, Address, Phone, City Tag */}
+                        <div>
+                          {/* Update City Tag */}
+                          {item.city && (
+                              <div className="mb-2 self-start">
+                                  <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                     {item.city}
+                                  </span>
+                              </div>
+                          )}
+                          {/* Change H2 to H3, keep visual style */}
+                          <h3 className="text-xl font-semibold mb-1">
+                            <Link href={`/${item.citySlug}/${item.slug}`}>
+                              <span className="text-gray-800 hover:text-primary transition-colors duration-150">
+                                {item.name}
                               </span>
-                          </Link>
+                            </Link>
+                          </h3>
+                          {/* Address */}
+                          <p className="text-gray-600 text-sm mb-1 flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                              </svg>
+                              {item.street || 'Address not specified'}, {item.city}
+                          </p>
+                          {/* Phone */}
+                          {item.phone && (
+                            <p className="text-gray-600 text-sm mb-3 flex items-center">
+                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                               </svg>
+                               {item.phone}
+                            </p>
+                          )}
+                        </div>
+                        {/* Bottom: Rating/Reviews and View Details */} 
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 pt-3 border-t border-gray-100">
+                             {/* Rating/Reviews */}
+                             <div className="flex items-center text-sm text-gray-600 mb-2 sm:mb-0 order-2 sm:order-1">
+                                 {item.rating ? (
+                                     <span className="text-yellow-500 mr-1">★ {Number(item.rating).toFixed(1)}</span>
+                                 ) : (
+                                     <span className="text-gray-400 mr-1">★ N/A</span>
+                                 )}
+                                 <span className="ml-1">({item.reviews || 0} reviews)</span>
+                             </div>
+                             {/* View Details Button */}
+                             <Link href={`/${item.citySlug}/${item.slug}`} className="order-1 sm:order-2">
+                               <span className="inline-block bg-primary-100 text-primary-700 hover:bg-primary-200 text-sm font-medium py-1.5 px-4 rounded-md transition duration-150 ease-in-out self-start sm:self-auto">
+                                    View Details
+                                </span>
+                            </Link>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-                {/* Pagination Controls */}
+                  ))}
+                </div> { /* End of grid */ }
+                
+                {/* Pagination Controls - NOW OUTSIDE and AFTER the grid */}
                 {totalPages > 1 && (
-                    <div className="mt-8 pt-6 border-t flex justify-center items-center space-x-2">
+                    <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center items-center space-x-2">
                        {/* Pagination buttons... */}
                        <button 
                             onClick={() => handlePageChange(currentPage - 1)}
@@ -312,7 +316,7 @@ export default function CityPage({ city }) {
                         </button>
                     </div>
                 )}
-              </div>
+              </>
             ) : (
               <p className="text-center text-gray-500 py-10">
                   No listings found matching your criteria in {city.name}.

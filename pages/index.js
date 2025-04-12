@@ -416,7 +416,7 @@ export default function Home({ allItems, bestRatedListings, topCityColumns, tota
                 {/* FAQ Section - Render the faqs array (grid handles layout) */}
                 <section className="mt-16 pt-12 border-t border-gray-200">
                     <h2 className="text-3xl font-semibold mb-8 text-center text-gray-800">Frequently Asked Questions</h2>
-                     <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
                         {faqs.map((faq, index) => (
                              <FaqItem 
                                key={index} 
