@@ -374,9 +374,9 @@ export default function CityPage({ city, cityDescriptionHtml }) {
             {/* --- Simplified City Description Section --- */}
             {cityDescriptionHtml && (
               <section className="w-full mt-12 pt-8 border-t border-gray-200">
-                  {/* Apply prose styles for basic HTML formatting */}
+                  {/* Remove prose styles for debugging */}
                   <div 
-                     className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none bg-white p-5 rounded-lg shadow border border-gray-100 text-gray-700 leading-relaxed" 
+                     className="max-w-none bg-white p-5 rounded-lg shadow border border-gray-100 text-gray-700 leading-relaxed" // Removed prose classes
                      dangerouslySetInnerHTML={{ __html: cityDescriptionHtml }}
                   />
               </section>
