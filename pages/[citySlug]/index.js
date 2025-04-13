@@ -38,60 +38,36 @@ export async function getStaticProps({ params }) {
     itemCount: currentCityData.items ? currentCityData.items.length : 0, // Calculate itemCount
   };
 
-  // --- Load and parse city description --- 
-  let descriptionTitle = null;
-  let descriptionBody = null;
+  // --- Load and parse city description (simplified) --- 
+  let cityDescriptionHtml = null; // Changed prop name
   console.log(`[getStaticProps] Processing city slug: ${citySlug}`);
 
   try {
     const descriptionsPath = path.join(process.cwd(), 'data', 'city_descriptions.csv');
     const csvData = fs.readFileSync(descriptionsPath, 'utf-8');
-    const lines = csvData.split(/\r?\n/); // Split lines robustly
+    const lines = csvData.split(/\r?\n/);
 
-    if (lines.length > 1 && lines[0]?.trim()) { // Check header line exists
-        // Use COMMA delimiter, find headers 'City' and 'City Description'
+    if (lines.length > 1 && lines[0]?.trim()) { 
         const header = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
         const slugIndex = header.indexOf('City');
         const descIndex = header.indexOf('City Description');
         console.log(`[getStaticProps] Header found:`, header, `Slug Index: ${slugIndex}`, `Desc Index: ${descIndex}`);
 
         if (slugIndex !== -1 && descIndex !== -1) {
-            // Loop through data lines (starting from index 1)
             for (let i = 1; i < lines.length; i++) {
-                if (!lines[i]?.trim()) continue; // Skip empty lines
-
-                // Split by COMMA, handling quoted fields
+                if (!lines[i]?.trim()) continue; 
                 const columns = lines[i].match(/("[^"]*"|[^,]+)/g) || [];
 
                 if (columns.length > Math.max(slugIndex, descIndex)) {
                     const csvCityName = columns[slugIndex]?.trim().replace(/^"|"$/g, '');
 
-                    // Case-insensitive match against citySlug from params
                     if (csvCityName && citySlug && csvCityName.toLowerCase() === citySlug.toLowerCase()) {
                         console.log(`[getStaticProps] Match found for ${citySlug} on line ${i + 1}`);
-                        
-                        // Directly access the description column
+                        // Directly get the description column, clean quotes
                         let rawDescription = columns[descIndex] || '';
-                        // Clean: remove surrounding quotes and trim whitespace
-                        rawDescription = rawDescription.trim().replace(/^"|"$/g, '');
-                        console.log(`[getStaticProps] Raw description snippet:`, rawDescription ? rawDescription.substring(0, 100) + '...' : '[EMPTY]');
-
-                        if (rawDescription) {
-                            // Regex to find first H2 and capture title/body
-                            const h2Regex = /<h2.*?>(.*?)<\/h2>(.*)/is;
-                            const match = rawDescription.match(h2Regex);
-
-                            if (match && match[1] && match[2]) {
-                                descriptionTitle = match[1].trim();
-                                descriptionBody = match[2].trim();
-                                console.log(`[getStaticProps] Successfully parsed title:`, descriptionTitle);
-                            } else {
-                                console.warn(`[getStaticProps] Raw description present, but failed H2 regex match for ${citySlug}.`);
-                            }
-                        } else {
-                            console.warn(`[getStaticProps] Empty raw description after cleaning for ${citySlug}.`);
-                        }
-                        break; // Found the city, exit loop
+                        cityDescriptionHtml = rawDescription.trim().replace(/^"|"$/g, ''); // Assign directly
+                        console.log(`[getStaticProps] Found raw description snippet:`, cityDescriptionHtml ? cityDescriptionHtml.substring(0, 100) + '...' : '[EMPTY]');
+                        break; 
                     }
                 } else {
                      console.warn(`[getStaticProps] Line ${i + 1} parsed into fewer columns (${columns.length}) than expected.`);
@@ -107,20 +83,19 @@ export async function getStaticProps({ params }) {
       console.error(`[getStaticProps] Exception during CSV processing for ${citySlug}:`, error);
   }
 
-  console.log(`[getStaticProps] Final result for ${citySlug}: Title found: ${!!descriptionTitle}, Body found: ${!!descriptionBody}`);
+  console.log(`[getStaticProps] Final result for ${citySlug}: Description HTML found: ${!!cityDescriptionHtml}`);
 
   return {
     props: {
       city: JSON.parse(JSON.stringify(minimalCity)),
-      descriptionTitle,
-      descriptionBody,
+      cityDescriptionHtml, // Pass the raw HTML
     },
   }
 }
 
 
-// City Page Component - Add description props
-export default function CityPage({ city, descriptionTitle, descriptionBody }) {
+// City Page Component - Adjust props
+export default function CityPage({ city, cityDescriptionHtml }) {
   const router = useRouter()
   // Items will now be fetched client-side
   const [items, setItems] = useState([]);
@@ -132,8 +107,6 @@ export default function CityPage({ city, descriptionTitle, descriptionBody }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRating, setSelectedRating] = useState(0);
   const [selectedReviews, setSelectedReviews] = useState(0);
-  // NEW: State for accordion visibility
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
   // Fetch items client-side based on city slug
   useEffect(() => {
@@ -267,7 +240,6 @@ export default function CityPage({ city, descriptionTitle, descriptionBody }) {
 
       {/* Main Content Area - Adjust main to take full width */}
       <div className="container mx-auto px-4 py-12 max-w-7xl">
-        {/* Remove flex layout, main takes full width */}
         <main className="w-full">
            <SearchFilterBar 
                 searchTerm={searchTerm}
@@ -399,49 +371,17 @@ export default function CityPage({ city, descriptionTitle, descriptionBody }) {
               </p>
             )}
 
-            {/* --- NEW: City Description Section --- */}
-            <section className="w-full mt-12 pt-8 border-t border-gray-200">
-                {descriptionTitle && descriptionBody ? (
-                    // Display Accordion if title and body exist
-                    <div className="bg-white p-5 rounded-lg shadow border border-gray-100 overflow-hidden">
-                      <button 
-                        className="flex justify-between items-center w-full text-left mb-3 pb-3 border-b" 
-                        onClick={() => setIsAccordionOpen(!isAccordionOpen)}
-                        aria-expanded={isAccordionOpen}
-                      >
-                        {/* Use the H2 content from CSV as title */}
-                        <h2 className="font-semibold text-xl md:text-2xl text-gray-800 mr-2">{descriptionTitle}</h2>
-                        {/* Arrow Icon */}
-                        <span className={`transform transition-transform duration-200 ${isAccordionOpen ? '-rotate-180' : 'rotate-0'}`}>
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                          </svg>
-                        </span>
-                      </button>
-                      {/* Accordion Content - Use dangerouslySetInnerHTML for HTML from CSV */}
-                      <div 
-                        className={`transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-[1000px]' : 'max-h-0'}`}
-                        style={{ maxHeight: isAccordionOpen ? '1000px' : '0' }} // Adjust max-height if needed
-                      >
-                         {/* Render HTML content from descriptionBody */}
-                         <div 
-                           className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none text-gray-700 leading-relaxed" 
-                           dangerouslySetInnerHTML={{ __html: descriptionBody }}
-                         />
-                      </div>
-                    </div>
-                ) : (
-                    // Display Placeholder if no description found
-                    <div className="text-center p-6 bg-gray-50 rounded-md">
-                       <p className="text-gray-600">
-                           These are the Top Pet Clinics in {city.name}.
-                       </p>
-                       {/* Optionally add a note about missing description */}
-                       {/* <p className="text-xs text-gray-400 mt-2">(Detailed city description coming soon)</p> */}
-                    </div>
-                )}
-            </section>
-            {/* --- END: City Description Section --- */}
+            {/* --- Simplified City Description Section --- */}
+            {cityDescriptionHtml && (
+              <section className="w-full mt-12 pt-8 border-t border-gray-200">
+                  {/* Apply prose styles for basic HTML formatting */}
+                  <div 
+                     className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none bg-white p-5 rounded-lg shadow border border-gray-100 text-gray-700 leading-relaxed" 
+                     dangerouslySetInnerHTML={{ __html: cityDescriptionHtml }}
+                  />
+              </section>
+            )}
+            {/* --- END: Simplified City Description Section --- */}
 
         </main>
         {/* Sidebar Area - REMOVED */}
