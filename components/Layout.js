@@ -92,6 +92,16 @@ export default function Layout({ children }) {
         {/* <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" /> */}
         {/* Add Google Site Verification */}
         <meta name="google-site-verification" content="vzbpQPeUWm7YRuYMecsOutD7aEuwFDy9mGyvSrkbxfg" />
+
+        {/* Grow.me Script - Placed directly in Head for detection */}
+        <script 
+          id="growme-script-in-head" 
+          dangerouslySetInnerHTML={{
+            __html: `
+              !(function(){window.growMe||((window.growMe=function(e){window.growMe._.push(e);}),(window.growMe._=[]));var e=document.createElement("script");(e.type="text/javascript"),(e.src="https://faves.grow.me/main.js"),(e.defer=!0),e.setAttribute("data-grow-faves-site-id","U2l0ZTo4NDAwODYzMS00ZmZkLTQ2ODgtYWQwYy03YmMzZjNjMzkzZWY=");var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t);})();
+            `,
+          }}
+        />
       </Head>
 
       {/* Google Analytics Scripts */}
@@ -110,24 +120,6 @@ export default function Layout({ children }) {
             gtag('config', 'G-3QLRZ6019H');
           `,
         }}
-      />
-
-      {/* Grow.me Script */}
-      <Script 
-        id="growme-initializer"
-        strategy="beforeInteractive" // Run this setup early
-        dangerouslySetInnerHTML={{
-          __html: `
-            !(function(){window.growMe||((window.growMe=function(e){window.growMe._.push(e);}),(window.growMe._=[]));})();
-          `,
-        }}
-      />
-      <Script 
-        id="growme-main"
-        strategy="afterInteractive" 
-        src="https://faves.grow.me/main.js"
-        defer 
-        data-grow-faves-site-id="U2l0ZTo4NDAwODYzMS00ZmZkLTQ2ODgtYWQwYy03YmMzZjNjMzkzZWY=" 
       />
 
       <div className="flex flex-col min-h-screen">
