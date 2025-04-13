@@ -278,8 +278,9 @@ export default function Home({ bestRatedListings, topCityColumns }) {
                       <h2 className="text-3xl font-bold text-center mb-8">Browse Popular Cities</h2>
                       {/* Grid for Columns (4 columns on large screens) */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"> 
-                          {topCityColumns.map((column, colIndex) => (
-                              {/* Column Box */}
+                          {topCityColumns.map((column, colIndex) => {
+                            return (
+                              // Column Box
                               <div key={colIndex} className="p-5 bg-white rounded-lg shadow border border-gray-100"> 
                                   {/* Simple list of cities within the column */}
                                   <ul className="space-y-1.5">
@@ -294,7 +295,8 @@ export default function Home({ bestRatedListings, topCityColumns }) {
                                       ))}
                                   </ul>
                               </div>
-                          ))}
+                            );
+                          })}
                       </div>
                       {/* Link to see all cities */}
                       <div className="text-center mt-8">
