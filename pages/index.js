@@ -214,7 +214,7 @@ export default function Home({ bestRatedListings, topCityColumns }) {
         {/* Static Title for Homepage */}
         <title>Best Pet Clinics Near Me - Veterinary Directory</title>
         {/* Static Description for Homepage */}
-        <meta name="description" content="Search our nationwide directory for the best local pet clinics and veterinary services near you."} />
+        <meta name="description" content="Search our nationwide directory for the best local pet clinics and veterinary services near you." />
         <meta name="keywords" content="pet clinic, veterinary, vet, veterinarian, near me, directory, animal hospital" />
         <link rel="canonical" href={baseUrl} />
         {/* OG Tags for Homepage */}
