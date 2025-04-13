@@ -124,10 +124,10 @@ export default function Layout({ children }) {
       />
       <Script 
         id="growme-main"
-        strategy="afterInteractive" // Load main script after page is interactive
+        strategy="afterInteractive" 
         src="https://faves.grow.me/main.js"
-        defer // Keep defer attribute as in original
-        data-grow-faves-site-id="U2l0ZTphYWI3YzE5My0xNWRlLTQ4MDItOTUxOS1lMzNmMWQwZjg4Y2E=" // Add custom data attribute
+        defer 
+        data-grow-faves-site-id="U2l0ZTo4NDAwODYzMS00ZmZkLTQ2ODgtYWQwYy03YmMzZjNjMzkzZWY=" 
       />
 
       <div className="flex flex-col min-h-screen">
