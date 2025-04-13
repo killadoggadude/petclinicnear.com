@@ -38,73 +38,76 @@ export async function getStaticProps({ params }) {
     itemCount: currentCityData.items ? currentCityData.items.length : 0, // Calculate itemCount
   };
 
-  // --- Load and parse city description (using TAB delimiter) --- 
+  // --- Load and parse city description --- 
   let descriptionTitle = null;
   let descriptionBody = null;
   console.log(`[getStaticProps] Processing city slug: ${citySlug}`);
+
   try {
     const descriptionsPath = path.join(process.cwd(), 'data', 'city_descriptions.csv');
     const csvData = fs.readFileSync(descriptionsPath, 'utf-8');
-    // Split lines, handling potential \r\n or \n line endings
-    const lines = csvData.split(/\r?\n/);
-    
-    if (lines.length > 1 && lines[0].trim() !== '') { // Check if header exists
-        // Split header by TAB
-        const header = lines[0].split('\t').map(h => h.trim().replace(/^"|"$/g, ''));
-        const slugIndex = header.indexOf('citySlug');
-        const descIndex = header.indexOf('description');
-        console.log(`[getStaticProps] Header:`, header, `Slug Index: ${slugIndex}`, `Desc Index: ${descIndex}`);
+    const lines = csvData.split(/\r?\n/); // Split lines robustly
+
+    if (lines.length > 1 && lines[0]?.trim()) { // Check header line exists
+        // Use COMMA delimiter, find headers 'City' and 'City Description'
+        const header = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        const slugIndex = header.indexOf('City');
+        const descIndex = header.indexOf('City Description');
+        console.log(`[getStaticProps] Header found:`, header, `Slug Index: ${slugIndex}`, `Desc Index: ${descIndex}`);
 
         if (slugIndex !== -1 && descIndex !== -1) {
+            // Loop through data lines (starting from index 1)
             for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue; // Skip empty lines
-                
-                // Split data line by TAB
-                const columns = lines[i].split('\t'); 
-                
-                // Ensure we have enough columns before accessing indices
+                if (!lines[i]?.trim()) continue; // Skip empty lines
+
+                // Split by COMMA, handling quoted fields
+                const columns = lines[i].match(/("[^"]*"|[^,]+)/g) || [];
+
                 if (columns.length > Math.max(slugIndex, descIndex)) {
-                    const currentLineSlug = columns[slugIndex]?.trim().replace(/^"|"$/g, '');
-                    
-                    if (currentLineSlug === citySlug) {
-                        console.log(`[getStaticProps] Found matching slug for ${citySlug} at line ${i + 1}`);
-                        // Directly get the description column content
-                        const rawDescription = columns[descIndex]?.trim().replace(/^"|"$/g, ''); 
-                        console.log(`[getStaticProps] Raw description for ${citySlug}:`, rawDescription);
+                    const csvCityName = columns[slugIndex]?.trim().replace(/^"|"$/g, '');
+
+                    // Case-insensitive match against citySlug from params
+                    if (csvCityName && citySlug && csvCityName.toLowerCase() === citySlug.toLowerCase()) {
+                        console.log(`[getStaticProps] Match found for ${citySlug} on line ${i + 1}`);
                         
+                        // Directly access the description column
+                        let rawDescription = columns[descIndex] || '';
+                        // Clean: remove surrounding quotes and trim whitespace
+                        rawDescription = rawDescription.trim().replace(/^"|"$/g, '');
+                        console.log(`[getStaticProps] Raw description snippet:`, rawDescription ? rawDescription.substring(0, 100) + '...' : '[EMPTY]');
+
                         if (rawDescription) {
+                            // Regex to find first H2 and capture title/body
                             const h2Regex = /<h2.*?>(.*?)<\/h2>(.*)/is;
                             const match = rawDescription.match(h2Regex);
-                            console.log(`[getStaticProps] H2 Regex match result for ${citySlug}:`, match ? 'Matched' : 'No Match');
-                            
+
                             if (match && match[1] && match[2]) {
                                 descriptionTitle = match[1].trim();
-                                descriptionBody = match[2].trim(); 
-                                console.log(`[getStaticProps] Parsed Title:`, descriptionTitle);
-                                // console.log(`[getStaticProps] Parsed Body:`, descriptionBody); // Keep body log commented unless needed, can be long
+                                descriptionBody = match[2].trim();
+                                console.log(`[getStaticProps] Successfully parsed title:`, descriptionTitle);
                             } else {
-                                 console.warn(`[getStaticProps] Description found for ${citySlug} but couldn't parse H2 title/body.`);
+                                console.warn(`[getStaticProps] Raw description present, but failed H2 regex match for ${citySlug}.`);
                             }
+                        } else {
+                            console.warn(`[getStaticProps] Empty raw description after cleaning for ${citySlug}.`);
                         }
-                        break; 
+                        break; // Found the city, exit loop
                     }
                 } else {
-                    // Log if a line doesn't have enough columns
-                    console.warn(`[getStaticProps] Line ${i + 1} has fewer columns than expected:`, columns.length);
+                     console.warn(`[getStaticProps] Line ${i + 1} parsed into fewer columns (${columns.length}) than expected.`);
                 }
             }
         } else {
-            console.warn('[getStaticProps] Could not find citySlug or description headers in CSV (using TAB delimiter).');
+             console.warn(`[getStaticProps] Failed to find required headers 'City' (${slugIndex}) or 'City Description' (${descIndex}) in CSV.`);
         }
     } else {
-        console.warn('[getStaticProps] city_descriptions.csv seems empty or has only a header.');
+        console.warn('[getStaticProps] city_descriptions.csv is empty or has no header line.');
     }
   } catch (error) {
-      console.error(`[getStaticProps] Error reading/parsing city_descriptions.csv for ${citySlug}:`, error);
+      console.error(`[getStaticProps] Exception during CSV processing for ${citySlug}:`, error);
   }
-  
-  console.log(`[getStaticProps] Final description parts for ${citySlug}:`, { descriptionTitle: !!descriptionTitle, descriptionBody: !!descriptionBody }); // Log boolean presence
-  // --- END: Load and parse city description ---
+
+  console.log(`[getStaticProps] Final result for ${citySlug}: Title found: ${!!descriptionTitle}, Body found: ${!!descriptionBody}`);
 
   return {
     props: {
