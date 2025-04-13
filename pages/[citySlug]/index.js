@@ -4,6 +4,9 @@ import { useRouter } from 'next/router'
 import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
+// Need fs and path for reading the description CSV
+import fs from 'fs';
+import path from 'path';
 
 // Dynamically import ALL potentially client-side components
 const Breadcrumbs = dynamic(() => import('../../components/Breadcrumbs'), { ssr: false });
@@ -33,20 +36,70 @@ export async function getStaticProps({ params }) {
     slug: currentCityData.slug,
     state: currentCityData.state || null, // Include state if available
     itemCount: currentCityData.items ? currentCityData.items.length : 0, // Calculate itemCount
-    // DO NOT include currentCityData.items
   };
+
+  // --- NEW: Load and parse city description --- 
+  let descriptionTitle = null;
+  let descriptionBody = null;
+  try {
+    const descriptionsPath = path.join(process.cwd(), 'data', 'city_descriptions.csv');
+    const csvData = fs.readFileSync(descriptionsPath, 'utf-8');
+    const lines = csvData.split('\n');
+    
+    if (lines.length > 1) {
+        const header = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '')); // Simple CSV header parse
+        const slugIndex = header.indexOf('citySlug');
+        const descIndex = header.indexOf('description');
+
+        if (slugIndex !== -1 && descIndex !== -1) {
+            for (let i = 1; i < lines.length; i++) {
+                const columns = lines[i].split(','); // Very basic split, assumes no commas in slugs
+                const currentLineSlug = columns[slugIndex]?.trim().replace(/^"|"$/g, '');
+                
+                if (currentLineSlug === citySlug) {
+                    // Combine potentially split description columns (simple approach)
+                    const rawDescription = columns.slice(descIndex).join(',').trim().replace(/^"|"$/g, '');
+                    
+                    if (rawDescription) {
+                        // Extract H2 title and body
+                        // Regex to find first H2 and capture its content and the rest
+                        const h2Regex = /<h2.*?>(.*?)<\/h2>(.*)/is;
+                        const match = rawDescription.match(h2Regex);
+                        
+                        if (match && match[1] && match[2]) {
+                            descriptionTitle = match[1].trim(); // Content inside H2
+                            descriptionBody = match[2].trim();  // Content after H2
+                        } else {
+                             // Fallback if no H2 found, treat whole description as body? Or null?
+                             // Setting to null to trigger placeholder for now if format is wrong.
+                             console.warn(`Description found for ${citySlug} but couldn't parse H2 title/body.`);
+                        }
+                    }
+                    break; // Found the city, exit loop
+                }
+            }
+        }
+    }
+  } catch (error) {
+      console.error(`Error reading or parsing city_descriptions.csv for ${citySlug}:`, error);
+      // Proceed without description if file read fails
+  }
+  // --- END: Load and parse city description ---
 
   return {
     props: {
       // Pass only the minimal city data
       city: JSON.parse(JSON.stringify(minimalCity)),
+      // Pass description parts
+      descriptionTitle,
+      descriptionBody,
     },
   }
 }
 
 
-// City Page Component - Remove categories prop
-export default function CityPage({ city }) {
+// City Page Component - Add description props
+export default function CityPage({ city, descriptionTitle, descriptionBody }) {
   const router = useRouter()
   // Items will now be fetched client-side
   const [items, setItems] = useState([]);
@@ -58,6 +111,8 @@ export default function CityPage({ city }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRating, setSelectedRating] = useState(0);
   const [selectedReviews, setSelectedReviews] = useState(0);
+  // NEW: State for accordion visibility
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
   // Fetch items client-side based on city slug
   useEffect(() => {
@@ -322,6 +377,51 @@ export default function CityPage({ city }) {
                   No listings found matching your criteria in {city.name}.
               </p>
             )}
+
+            {/* --- NEW: City Description Section --- */}
+            <section className="w-full mt-12 pt-8 border-t border-gray-200">
+                {descriptionTitle && descriptionBody ? (
+                    // Display Accordion if title and body exist
+                    <div className="bg-white p-5 rounded-lg shadow border border-gray-100 overflow-hidden">
+                      <button 
+                        className="flex justify-between items-center w-full text-left mb-3 pb-3 border-b" 
+                        onClick={() => setIsAccordionOpen(!isAccordionOpen)}
+                        aria-expanded={isAccordionOpen}
+                      >
+                        {/* Use the H2 content from CSV as title */}
+                        <h2 className="font-semibold text-xl md:text-2xl text-gray-800 mr-2">{descriptionTitle}</h2>
+                        {/* Arrow Icon */}
+                        <span className={`transform transition-transform duration-200 ${isAccordionOpen ? '-rotate-180' : 'rotate-0'}`}>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </span>
+                      </button>
+                      {/* Accordion Content - Use dangerouslySetInnerHTML for HTML from CSV */}
+                      <div 
+                        className={`transition-all duration-300 ease-in-out overflow-hidden ${isAccordionOpen ? 'max-h-[1000px]' : 'max-h-0'}`}
+                        style={{ maxHeight: isAccordionOpen ? '1000px' : '0' }} // Adjust max-height if needed
+                      >
+                         {/* Render HTML content from descriptionBody */}
+                         <div 
+                           className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none text-gray-700 leading-relaxed" 
+                           dangerouslySetInnerHTML={{ __html: descriptionBody }}
+                         />
+                      </div>
+                    </div>
+                ) : (
+                    // Display Placeholder if no description found
+                    <div className="text-center p-6 bg-gray-50 rounded-md">
+                       <p className="text-gray-600">
+                           These are the Top Pet Clinics in {city.name}.
+                       </p>
+                       {/* Optionally add a note about missing description */}
+                       {/* <p className="text-xs text-gray-400 mt-2">(Detailed city description coming soon)</p> */}
+                    </div>
+                )}
+            </section>
+            {/* --- END: City Description Section --- */}
+
         </main>
         {/* Sidebar Area - REMOVED */}
         {/* 

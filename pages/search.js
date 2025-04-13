@@ -66,17 +66,17 @@ export default function SearchPage({ searchQuery, searchResults, error }) {
     // Handle potential loading state or error from getServerSideProps
     if (error) {
        return (
-            <Layout>
-                <div className="container mx-auto px-4 py-12 max-w-7xl">
-                    <h1 className="text-2xl font-semibold mb-4">Search Error</h1>
-                    <p className="text-red-600">{error}</p>
-                </div>
-            </Layout>
+            // No Layout here - handled by _app.js
+            <div className="container mx-auto px-4 py-12 max-w-7xl">
+                <h1 className="text-2xl font-semibold mb-4">Search Error</h1>
+                <p className="text-red-600">{error}</p>
+            </div>
        );
     }
 
     return (
-        <Layout>
+        // Return Fragment or directly the content, Layout is applied by _app.js
+        <>
             <Head>
                 <title>{searchQuery ? `Search Results for "${searchQuery}"` : 'Search'} - Pet Clinic Directory</title>
                 <meta name="description" content={`Find pet clinics matching "${searchQuery}" in our directory.`} />
@@ -109,6 +109,6 @@ export default function SearchPage({ searchQuery, searchResults, error }) {
                     </p>
                 )}
             </div>
-        </Layout>
+        </>
     );
 } 
