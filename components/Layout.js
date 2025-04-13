@@ -112,6 +112,24 @@ export default function Layout({ children }) {
         }}
       />
 
+      {/* Grow.me Script */}
+      <Script 
+        id="growme-initializer"
+        strategy="beforeInteractive" // Run this setup early
+        dangerouslySetInnerHTML={{
+          __html: `
+            !(function(){window.growMe||((window.growMe=function(e){window.growMe._.push(e);}),(window.growMe._=[]));})();
+          `,
+        }}
+      />
+      <Script 
+        id="growme-main"
+        strategy="afterInteractive" // Load main script after page is interactive
+        src="https://faves.grow.me/main.js"
+        defer // Keep defer attribute as in original
+        data-grow-faves-site-id="U2l0ZTphYWI3YzE5My0xNWRlLTQ4MDItOTUxOS1lMzNmMWQwZjg4Y2E=" // Add custom data attribute
+      />
+
       <div className="flex flex-col min-h-screen">
         <header className="bg-white shadow-md sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center max-w-7xl">

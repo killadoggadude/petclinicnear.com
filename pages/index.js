@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import { useState, useMemo, useEffect } from 'react' // Add useEffect
+import { useState, useEffect } from 'react' // Keep useState/useEffect for search input 
 import Image from 'next/image' // Import Image
 import FilterSidebar from '../components/FilterSidebar' // CORRECTED PATH: Import the sidebar
 import Breadcrumbs from '../components/Breadcrumbs' // CORRECTED PATH: Import Breadcrumbs
@@ -11,26 +11,25 @@ export async function getStaticProps() {
   const fs = require('fs'); 
   const path = require('path'); 
   
-  let cities = []; // Fetch cities
-  let allItems = [];
+  let cities = [];
+  let allItems = []; // Still load allItems to find best rated
 
   try {
       const dataPath = path.join(process.cwd(), 'data', 'processed_data.json');
-      const jsonData = fs.readFileSync(dataPath);
+      const jsonData = fs.readFileSync(dataPath, 'utf-8');
       const processedData = JSON.parse(jsonData);
-      // Use the reverted cities structure
       cities = processedData?.cities || []; 
       allItems = processedData?.allItems || []; 
-      console.log(`DEBUG: Read ${allItems.length} items, ${cities.length} cities.`);
+      console.log(`DEBUG (Homepage getStaticProps): Read ${allItems.length} items, ${cities.length} cities.`);
   } catch (error) {
       console.error("Error reading or parsing processed data for homepage:", error);
+      return { props: { /* Return empty/default props on error */ bestRatedListings: [], topCityColumns: [], totalItemCount: 0 } };
   }
   
-  // Sort items by rating (descending), handling nulls
+  // Sort items by rating
   allItems.sort((a, b) => {
-    const ratingA = a.rating ?? -1; // Treat null rating as lowest
+    const ratingA = a.rating ?? -1; 
     const ratingB = b.rating ?? -1;
-    // Secondary sort by reviews if ratings are equal
     if (ratingB !== ratingA) {
         return ratingB - ratingA; 
     }
@@ -38,37 +37,38 @@ export async function getStaticProps() {
     const reviewsB = b.reviews ?? 0;
     return reviewsB - reviewsA;
   });
-  // Take top 12 best rated for 3 rows of 4
+  // Take top 12 best rated
   const bestRatedListings = allItems.slice(0, 12); 
 
-  // --- START: Select and Group Top Cities --- 
-  const MIN_LISTINGS_THRESHOLD = 2; // Minimum listings a city needs to be considered
+  // --- Select and Group Top Cities --- 
+  const MIN_LISTINGS_THRESHOLD = 2; 
   const NUM_TOP_CITIES_TO_SHOW = 60;
   const NUM_COLUMNS = 4;
 
   const topCities = cities
-    .filter(city => city.itemCount >= MIN_LISTINGS_THRESHOLD) // Filter cities with enough listings
-    .sort((a, b) => b.itemCount - a.itemCount) // Sort by itemCount descending
-    .slice(0, NUM_TOP_CITIES_TO_SHOW); // Take the top N
+    .filter(city => city.itemCount >= MIN_LISTINGS_THRESHOLD) 
+    .sort((a, b) => b.itemCount - a.itemCount) 
+    .slice(0, NUM_TOP_CITIES_TO_SHOW); 
 
-  // Distribute top cities into columns
   const topCityColumns = Array.from({ length: NUM_COLUMNS }, () => []);
   topCities.forEach((city, index) => {
     topCityColumns[index % NUM_COLUMNS].push({
         name: city.name,
         slug: city.slug,
         itemCount: city.itemCount,
-        state: city.state || null // Include state for display if needed
+        state: city.state || null 
     });
   });
   // --- END: Select and Group Top Cities ---
 
   return {
     props: {
-      topCityColumns, // Added
-      allItems,
+      topCityColumns, 
+      // DO NOT PASS allItems
+      // allItems,
       bestRatedListings, 
-      totalItemCount: allItems.length,
+      // Pass totalItemCount if needed for display, otherwise remove
+      // totalItemCount: allItems.length, 
     },
   }
 }
@@ -85,10 +85,16 @@ function ListingCard({ item }) {
                         alt={`${item.name}`}
                         fill 
                         style={{ objectFit: 'cover' }} 
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" 
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" 
+                        priority={true}
                     />
                 </Link>
             )}
+            {!item.imageUrl && (
+                <div className="w-full h-40 relative flex-shrink-0 block bg-gray-100 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}> <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /> </svg>
+                </div>
+             )}
             <div className="p-4 flex flex-col flex-grow">
                 {item.city && (
                     <div className="mb-2 self-start">
@@ -153,48 +159,18 @@ function FaqItem({ question, answer, isOpen, onToggle }) {
 }
 
 // --- Homepage Component --- 
-export default function Home({ allItems, bestRatedListings, topCityColumns, totalItemCount }) {
+export default function Home({ bestRatedListings, topCityColumns }) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaqStates, setOpenFaqStates] = useState({});
   const baseUrl = "https://petclinicnear.com"; // Updated domain
 
-  // Effect to check URL query parameter on load
-  useEffect(() => {
-    // Ensure router is ready and query param exists
-    if (router.isReady && router.query.q) {
-      const queryParam = Array.isArray(router.query.q) ? router.query.q[0] : router.query.q;
-      setSearchQuery(queryParam); // Set search state from URL
-    }
-    // Optional: Clear search if query param is removed?
-    // else if (router.isReady && !router.query.q) {
-    //   setSearchQuery('');
-    // }
-  }, [router.isReady, router.query.q]); // Re-run if query param changes
-
-  // Memoize filtered results based on searchQuery state
-  const filteredSearchResults = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return []; // Return empty array if no search query
-    }
-    const lowerCaseQuery = searchQuery.toLowerCase();
-    return allItems.filter(item => 
-      item.name?.toLowerCase().includes(lowerCaseQuery) ||
-      item.city?.toLowerCase().includes(lowerCaseQuery) || 
-      item.state?.toLowerCase().includes(lowerCaseQuery) || 
-      item.street?.toLowerCase().includes(lowerCaseQuery) ||
-      item.description?.toLowerCase().includes(lowerCaseQuery) 
-    );
-  }, [searchQuery, allItems]); // Re-calculate when searchQuery or allItems change
-
-  // Handle search form submission on the homepage itself (updates state)
+  // Standard search form handler - Navigates to /?q=...
   const handleHomepageSearch = (event) => {
     event.preventDefault(); 
-    // Just update the state, useMemo will trigger filtering
-    // We could also push the query to the URL, but updating state is simpler here
-    // router.push(`/?q=${encodeURIComponent(searchQuery)}`); 
-    // For simplicity, we'll let the existing filter logic run based on state change
-    // If user manually clears input, filteredSearchResults becomes empty
+    if (searchQuery.trim()) {
+      router.push(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
 
   // Placeholder FAQ data (Expanded to 10 items)
@@ -219,17 +195,6 @@ export default function Home({ allItems, bestRatedListings, topCityColumns, tota
     }));
   };
 
-  const showSearchResults = searchQuery.trim().length > 0;
-
-  // Define breadcrumbs for search results page
-  const searchBreadcrumbs = [
-    { name: 'Home', href: '/' },
-    { name: `Search Results for "${searchQuery}"`, href: null },
-  ];
-
-  // Define breadcrumbs for homepage (only used when not searching)
-  const homeBreadcrumbs = [{ name: 'Home', href: null }]; // Example if needed
-
   // Homepage Schema
   const websiteSchema = {
     "@context": "https://schema.org",
@@ -246,10 +211,10 @@ export default function Home({ allItems, bestRatedListings, topCityColumns, tota
   return (
     <>
       <Head>
-        {/* Updated homepage title */}
+        {/* Static Title for Homepage */}
         <title>Best Pet Clinics Near Me - Veterinary Directory</title>
-        {/* Keep description dynamic based on search */}
-        <meta name="description" content={showSearchResults ? `Search results for ${searchQuery}` : "Search our nationwide directory for the best local pet clinics and veterinary services near you."} />
+        {/* Static Description for Homepage */}
+        <meta name="description" content="Search our nationwide directory for the best local pet clinics and veterinary services near you."} />
         <meta name="keywords" content="pet clinic, veterinary, vet, veterinarian, near me, directory, animal hospital" />
         <link rel="canonical" href={baseUrl} />
         {/* OG Tags for Homepage */}
@@ -267,178 +232,101 @@ export default function Home({ allItems, bestRatedListings, topCityColumns, tota
         {/* <script type="application/ld+json">{JSON.stringify(websiteSchema)}</script> */}
       </Head>
 
-      {/* CONDITIONAL RENDERING: Show Search Results Layout OR Default Homepage Layout */} 
-      {showSearchResults ? (
-        // --- SEARCH RESULTS LAYOUT --- 
-        <>
-          {/* Simple Hero for Search Results */}
-          <div className="bg-gradient-to-r from-primary-50 to-orange-100 py-8 px-4 border-b border-orange-200">
+      {/* --- DEFAULT HOMEPAGE LAYOUT --- */}
+      <>
+        {/* Hero Section */}
+        <div className="bg-gradient-to-r from-gray-50 via-gray-100 to-gray-200 text-gray-800 py-16 px-4 text-center border-b border-gray-200">
             <div className="container mx-auto max-w-7xl">
-                <Breadcrumbs crumbs={searchBreadcrumbs} />
-                {/* Main H1 for Search Results */}
-                <h1 className="text-3xl md:text-4xl font-bold mt-2 text-gray-800">Search results for "{searchQuery}"</h1>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Find Your Local Pet Clinic</h1>
+                <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto text-gray-600">Compassionate, reliable pet clinics are just a search away. Enter your location or browse our veterinary directory.</p>
+                {/* Search Form - Uses standard handler now */}
+                <form onSubmit={handleHomepageSearch} className="mb-4 max-w-xl mx-auto flex gap-2">
+                    <input
+                        type="text"
+                        placeholder="Search by name, city, state, address..." 
+                        className="flex-grow p-4 border rounded-l-md shadow-sm text-gray-800 focus:ring-2 focus:ring-primary-300 focus:outline-none"
+                        value={searchQuery} 
+                        onChange={(e) => setSearchQuery(e.target.value)} 
+                    />
+                    <button 
+                        type="submit"
+                        className="bg-primary hover:bg-primary-600 text-white font-bold py-2 px-6 rounded-r-md shadow-sm transition duration-150 ease-in-out"
+                    >
+                        Search
+                    </button>
+                </form>
             </div>
+        </div>
+
+        {/* Default Homepage Main Content Area */}
+        <div className="container mx-auto px-4 py-12 max-w-7xl">
+          <div className="space-y-12">
+              {/* Best Rated Listings Section */}
+              {bestRatedListings && bestRatedListings.length > 0 && (
+                  <section>
+                      <h2 className="text-3xl font-semibold mb-6 border-b-2 border-gray-300 pb-2">Best Rated Pet Clinics</h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                          {bestRatedListings.map(item => <ListingCard key={`${item.citySlug}-${item.slug}`} item={item} />)}
+                      </div>
+                  </section>
+              )}
+
+              {/* Browse Popular Cities Section - Use 4 columns */}
+              {topCityColumns && topCityColumns.length > 0 && (
+                  <section className="mb-16">
+                      {/* Section Heading */}
+                      <h2 className="text-3xl font-bold text-center mb-8">Browse Popular Cities</h2>
+                      {/* Grid for Columns (4 columns on large screens) */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"> 
+                          {topCityColumns.map((column, colIndex) => (
+                              {/* Column Box */}
+                              <div key={colIndex} className="p-5 bg-white rounded-lg shadow border border-gray-100"> 
+                                  {/* Simple list of cities within the column */}
+                                  <ul className="space-y-1.5">
+                                      {Array.isArray(column) && column.map(city => (
+                                          <li key={city.slug}>
+                                              <Link href={`/${city.slug}`}>
+                                                  <span className="block text-primary-600 hover:text-primary-800 hover:underline text-sm truncate">
+                                                      {city.name} <span className="text-xs text-gray-400">({city.itemCount})</span>
+                                                  </span>
+                                              </Link>
+                                          </li>
+                                      ))}
+                                  </ul>
+                              </div>
+                          ))}
+                      </div>
+                      {/* Link to see all cities */}
+                      <div className="text-center mt-8">
+                          <Link href="/cities">
+                              <span className="text-primary-600 hover:text-primary-800 hover:underline font-medium">
+                                  View All Cities &rarr;
+                              </span>
+                          </Link>
+                      </div>
+                  </section>
+              )}
+
+              {/* FAQ Section - Updated to use independent state */}
+              <section className="mt-16 pt-12 border-t border-gray-200">
+                  <h2 className="text-3xl font-semibold mb-8 text-center text-gray-800">Frequently Asked Questions</h2>
+                   <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6"> 
+                      {faqs.map((faq, index) => (
+                           <FaqItem 
+                             key={index} 
+                             question={faq.question} 
+                             answer={faq.answer} 
+                             // Check the state for this specific index
+                             isOpen={!!openFaqStates[index]} 
+                             onToggle={() => handleFaqToggle(index)}
+                           />
+                      ))}
+                   </div>
+              </section>
           </div>
-
-          {/* Search Results Content Area */}
-          <div className="container mx-auto px-4 py-12 max-w-7xl">
-            <h2 className="sr-only">Search Results List ({filteredSearchResults.length})</h2> {/* Screen reader heading */}
-            {filteredSearchResults.length > 0 ? (
-              <div className="space-y-4">
-                 {filteredSearchResults.map((item) => (
-                    // Add flex container for image + text
-                    <div key={`${item.citySlug}-${item.slug}`} className="bg-white p-4 rounded-md shadow-sm border border-gray-200 flex gap-4 items-start">
-                         {/* START: Image Thumbnail */}
-                         {item.imageUrl && (
-                            <Link href={`/${item.citySlug}/${item.slug}`} className="flex-shrink-0 w-24 h-24 relative block rounded overflow-hidden border">
-                                <Image 
-                                    src={item.imageUrl}
-                                    alt={item.name}
-                                    fill
-                                    style={{ objectFit: 'cover' }}
-                                    sizes="96px"
-                                />
-                            </Link>
-                         )}
-                         {!item.imageUrl && (
-                             <div className="flex-shrink-0 w-24 h-24 rounded border bg-gray-100 flex items-center justify-center text-gray-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}> <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /> </svg>
-                             </div>
-                         )}
-                         {/* END: Image Thumbnail */}
-
-                         {/* Text Content (Takes remaining space) */}
-                         <div className="flex-grow flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                             <div className="flex-grow">
-                                <h3 className="text-lg font-semibold text-primary-700 hover:text-primary-900">
-                                    <Link href={`/${item.citySlug}/${item.slug}`}>{item.name}</Link>
-                                </h3>
-                                <p className="text-gray-600 text-sm mt-1">{item.street}</p>
-                                <p className="text-gray-600 text-sm">{item.city}, {item.state}</p>
-                                {(item.rating || item.reviews) && (
-                                    <div className="flex items-center text-xs mt-1 text-gray-500">
-                                        {item.rating && <span className="text-yellow-500 mr-1">★ {item.rating.toFixed(1)}</span>}
-                                        {item.reviews && <span>({item.reviews} reviews)</span>}
-                                    </div>
-                                )}
-                            </div>
-                            <Link href={`/${item.citySlug}/${item.slug}`} className="mt-2 sm:mt-0 flex-shrink-0">
-                               <span className="inline-block bg-primary-100 text-primary-700 hover:bg-primary-200 text-sm font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
-                                    View Details &rarr;
-                                </span>
-                            </Link>
-                        </div>
-                    </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center py-10 bg-gray-100 rounded-md">No items found matching your search criteria: "{searchQuery}"</p>
-            )}
-          </div>
-        </>
-        // --- END SEARCH RESULTS LAYOUT --- 
-
-      ) : (
-
-        // --- DEFAULT HOMEPAGE LAYOUT --- 
-        <>
-          {/* Hero Section - Update Styling */}
-          <div className="bg-gradient-to-r from-gray-50 via-gray-100 to-gray-200 text-gray-800 py-16 px-4 text-center border-b border-gray-200"> {/* Light Gray Gradient */}
-              <div className="container mx-auto max-w-7xl">
-                  {/* Update text color */}
-                  <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Find Your Local Pet Clinic</h1>
-                  {/* Update text color */}
-                  <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto text-gray-600">Compassionate, reliable pet clinics are just a search away. Enter your location or browse our veterinary directory.</p>
-                  {/* Search Form */}
-                  <form onSubmit={handleHomepageSearch} className="mb-4 max-w-xl mx-auto flex gap-2">
-                      <input
-                          type="text"
-                          placeholder="Search by name, city, state, address..." 
-                          className="flex-grow p-4 border rounded-l-md shadow-sm text-gray-800 focus:ring-2 focus:ring-primary-300 focus:outline-none"
-                          value={searchQuery} 
-                          onChange={(e) => setSearchQuery(e.target.value)} 
-                      />
-                      <button 
-                          type="submit"
-                          // Change button color
-                          className="bg-primary hover:bg-primary-600 text-white font-bold py-2 px-6 rounded-r-md shadow-sm transition duration-150 ease-in-out"
-                      >
-                          Search
-                      </button>
-                  </form>
-              </div>
-          </div>
-
-          {/* Default Homepage Main Content Area */}
-          <div className="container mx-auto px-4 py-12 max-w-7xl">
-            <div className="space-y-12">
-                {/* Best Rated Listings Section */}
-                {bestRatedListings.length > 0 && (
-                    <section>
-                        <h2 className="text-3xl font-semibold mb-6 border-b-2 border-gray-300 pb-2">Best Rated Pet Clinics</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {bestRatedListings.map(item => <ListingCard key={`${item.citySlug}-${item.slug}`} item={item} />)}
-                        </div>
-                    </section>
-                )}
-
-                {/* Browse Popular Cities Section - Use 4 columns */}
-                {topCityColumns && topCityColumns.length > 0 && (
-                    <section className="mb-16">
-                        {/* Section Heading */}
-                        <h2 className="text-3xl font-bold text-center mb-8">Browse Popular Cities</h2>
-                        {/* Grid for Columns (4 columns on large screens) */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"> 
-                            {topCityColumns.map((column, colIndex) => (
-                                // Column Box
-                                <div key={colIndex} className="p-5 bg-white rounded-lg shadow border border-gray-100"> 
-                                    {/* Simple list of cities within the column */}
-                                    <ul className="space-y-1.5">
-                                        {Array.isArray(column) && column.map(city => (
-                                            <li key={city.slug}>
-                                                <Link href={`/${city.slug}`}>
-                                                    <span className="block text-primary-600 hover:text-primary-800 hover:underline text-sm truncate">
-                                                        {city.name} <span className="text-xs text-gray-400">({city.itemCount})</span>
-                                                    </span>
-                                                </Link>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ))}
-                        </div>
-                        {/* Link to see all cities */}
-                        <div className="text-center mt-8">
-                            <Link href="/cities">
-                                <span className="text-primary-600 hover:text-primary-800 hover:underline font-medium">
-                                    View All Cities &rarr;
-                                </span>
-                            </Link>
-                        </div>
-                    </section>
-                )}
-
-                {/* FAQ Section - Updated to use independent state */}
-                <section className="mt-16 pt-12 border-t border-gray-200">
-                    <h2 className="text-3xl font-semibold mb-8 text-center text-gray-800">Frequently Asked Questions</h2>
-                     <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6"> 
-                        {faqs.map((faq, index) => (
-                             <FaqItem 
-                               key={index} 
-                               question={faq.question} 
-                               answer={faq.answer} 
-                               // Check the state for this specific index
-                               isOpen={!!openFaqStates[index]} 
-                               onToggle={() => handleFaqToggle(index)}
-                             />
-                        ))}
-                     </div>
-                </section>
-            </div>
-          </div>
-        </>
-        // --- END DEFAULT HOMEPAGE LAYOUT --- 
-      )}
+        </div>
+      </>
+      {/* --- END DEFAULT HOMEPAGE LAYOUT --- */}
     </>
   )
 } 
