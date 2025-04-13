@@ -241,11 +241,11 @@ export default function Layout({ children }) {
           {isSearchOpen && (
               <div className="absolute top-full left-0 right-0 bg-white border-t border-b border-gray-200 shadow-md z-40">
                   <div className="container mx-auto px-4 py-3 max-w-7xl">
-                     {/* Basic Search Form - Action points to homepage search */}
-                     <form action="/" method="GET" className="flex gap-2">
+                     {/* Basic Search Form - Action points to search page now */}
+                     <form action="/search" method="GET" className="flex gap-2">
                           <input 
                               type="search" 
-                              name="q" // Use 'q' for query param like homepage
+                              name="q" // Use 'q' for query param 
                               placeholder="Search listings..." 
                               className="flex-grow p-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
                           />
