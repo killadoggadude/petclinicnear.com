@@ -38,8 +38,8 @@ export async function getStaticProps({ params }) {
     itemCount: currentCityData.items ? currentCityData.items.length : 0, // Calculate itemCount
   };
 
-  // --- Load and parse city description (simplified) --- 
-  let cityDescriptionHtml = null; // Changed prop name
+  // --- Load and parse city description (using simpler split) --- 
+  let cityDescriptionHtml = null; 
   console.log(`[getStaticProps] Processing city slug: ${citySlug}`);
 
   try {
@@ -48,33 +48,42 @@ export async function getStaticProps({ params }) {
     const lines = csvData.split(/\r?\n/);
 
     if (lines.length > 1 && lines[0]?.trim()) { 
+        // Still check header to be safe, but we won't use descIndex
         const header = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
         const slugIndex = header.indexOf('City');
-        const descIndex = header.indexOf('City Description');
-        console.log(`[getStaticProps] Header found:`, header, `Slug Index: ${slugIndex}`, `Desc Index: ${descIndex}`);
+        console.log(`[getStaticProps] Header found:`, header, `Slug Index: ${slugIndex}`);
 
-        if (slugIndex !== -1 && descIndex !== -1) {
+        if (slugIndex !== -1) { // Only need slugIndex now
             for (let i = 1; i < lines.length; i++) {
-                if (!lines[i]?.trim()) continue; 
-                const columns = lines[i].match(/("[^"]*"|[^,]+)/g) || [];
+                const line = lines[i];
+                if (!line?.trim()) continue; 
 
-                if (columns.length > Math.max(slugIndex, descIndex)) {
-                    const csvCityName = columns[slugIndex]?.trim().replace(/^"|"$/g, '');
+                // Find the first comma to separate City from Description
+                const firstCommaIndex = line.indexOf(',');
 
+                if (firstCommaIndex !== -1) {
+                    const csvCityName = line.substring(0, firstCommaIndex).trim().replace(/^"|"$/g, '');
+
+                    // Case-insensitive match
                     if (csvCityName && citySlug && csvCityName.toLowerCase() === citySlug.toLowerCase()) {
                         console.log(`[getStaticProps] Match found for ${citySlug} on line ${i + 1}`);
-                        // Directly get the description column, clean quotes
-                        let rawDescription = columns[descIndex] || '';
-                        cityDescriptionHtml = rawDescription.trim().replace(/^"|"$/g, ''); // Assign directly
+                        
+                        // Description is everything AFTER the first comma
+                        let rawDescription = line.substring(firstCommaIndex + 1);
+                        
+                        // Clean: remove potential surrounding quotes and trim whitespace
+                        cityDescriptionHtml = rawDescription.trim().replace(/^"|"$/g, ''); 
+                        
                         console.log(`[getStaticProps] Found raw description snippet:`, cityDescriptionHtml ? cityDescriptionHtml.substring(0, 100) + '...' : '[EMPTY]');
+                        console.log(`[getStaticProps] Full description length: ${cityDescriptionHtml?.length || 0}`); // Log full length
                         break; 
                     }
                 } else {
-                     console.warn(`[getStaticProps] Line ${i + 1} parsed into fewer columns (${columns.length}) than expected.`);
+                     console.warn(`[getStaticProps] Line ${i + 1} does not contain a comma delimiter.`);
                 }
             }
         } else {
-             console.warn(`[getStaticProps] Failed to find required headers 'City' (${slugIndex}) or 'City Description' (${descIndex}) in CSV.`);
+             console.warn(`[getStaticProps] Failed to find required header 'City' (${slugIndex}) in CSV.`);
         }
     } else {
         console.warn('[getStaticProps] city_descriptions.csv is empty or has no header line.');
@@ -88,7 +97,7 @@ export async function getStaticProps({ params }) {
   return {
     props: {
       city: JSON.parse(JSON.stringify(minimalCity)),
-      cityDescriptionHtml, // Pass the raw HTML
+      cityDescriptionHtml,
     },
   }
 }
