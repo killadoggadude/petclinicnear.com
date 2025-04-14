@@ -73,8 +73,8 @@ export default function AllStatesPage({ states, totalStateCount, totalItemCount 
           // Grid for states
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {states.map((state) => (
-              // Wrap the div content in a Link component
-              <Link key={state.slug} href={`/${state.slug}`}> 
+              // Wrap the div content in a Link component pointing to /state/[stateSlug]
+              <Link key={state.slug} href={`/state/${state.slug}`}> 
                 <span className="block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-blue-300 transition duration-150 ease-in-out cursor-pointer">
                   <h2 className="text-lg font-semibold text-gray-800 hover:text-blue-600">Pet Clinics in {state.name}</h2>
                   <p className="text-sm text-gray-500 mt-1">

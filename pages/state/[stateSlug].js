@@ -98,7 +98,7 @@ export default function StatePage({ stateName, items, totalItemCount }) {
         <title>Pet Clinics in {stateName} - {totalItemCount} Listings | Pet Clinic Directory</title>
         <meta name="description" content={`Find the best ${totalItemCount} pet clinics and veterinarians in ${stateName}. Browse listings, ratings, and contact information.`} />
         {/* Add canonical URL if needed */}
-        {/* <link rel="canonical" href={`https://petclinicnear.com/${stateName.toLowerCase().replace(/\s+/g, '-')}`} /> */}
+        {/* <link rel="canonical" href={`https://petclinicnear.com/state/${stateName.toLowerCase().replace(/\s+/g, '-')}`} /> */}
       </Head>
 
       {/* Top Hero (Breadcrumbs only) */}

@@ -294,8 +294,8 @@ export default function Home({ bestRatedListings, topCityColumns, topStateColumn
                                   <ul className="space-y-1.5">
                                       {Array.isArray(column) && column.map(state => (
                                           <li key={state.slug}>
-                                              {/* Update Link to point to dynamic state page */}
-                                              <Link href={`/${state.slug}`}> 
+                                              {/* Update Link to point to dynamic state page with /state/ prefix */}
+                                              <Link href={`/state/${state.slug}`}> 
                                                   <span className="block text-primary-600 hover:text-primary-800 hover:underline text-sm truncate cursor-pointer">
                                                       {state.name} <span className="text-xs text-gray-400">({state.itemCount})</span>
                                                   </span>
