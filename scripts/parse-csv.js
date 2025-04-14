@@ -174,11 +174,11 @@ async function main() {
         itemData.name = record[NAME_HEADER]; // Ensure correct name field
         itemData.slug = itemSlug; 
         itemData.citySlug = citySlug; 
-        itemData.city = record[CITY_HEADER]; // Ensure correct city field using CITY_HEADER
+        itemData.city = record[CITY_HEADER]; // Ensure correct city field
         itemData.state = record[REGION_HEADER]; // Ensure correct state field
+        itemData.street = record[STREET_HEADER]; // FIX: Explicitly assign street
         
         // Explicitly include the description using the correct header constant
-        // This ensures it's present even if the generic mapping didn't catch it
         itemData.description = record[DESCRIPTION_HEADER] || null; 
 
         // Clean up keys that might have been duplicated by the generic mapping
@@ -186,6 +186,7 @@ async function main() {
         delete itemData[NAME_HEADER];
         delete itemData[CITY_HEADER];
         delete itemData[REGION_HEADER];
+        delete itemData[STREET_HEADER]; // FIX: Delete original Street key
         delete itemData[DESCRIPTION_HEADER]; // Remove the key with the original header name
         
         // Re-assign core fields and ensure description comes from mapping
