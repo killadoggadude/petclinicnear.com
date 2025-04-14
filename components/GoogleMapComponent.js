@@ -40,19 +40,17 @@ export default function GoogleMapComponent({ latitude, longitude, name, address 
     <div className="w-full md:w-80 lg:w-96 flex-shrink-0">
       <div className="relative bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-sm w-full aspect-square">
         {/* Map Iframe using Google Maps Embed API */}
-        <div className="w-full h-full relative">
-          <iframe
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            loading="lazy"
-            allowFullScreen
-            referrerPolicy="no-referrer-when-downgrade"
-            src={mapEmbedUrl}
-            title={`Google Map showing location of ${name}`}
-            className="absolute inset-0"
-          ></iframe>
-        </div>
+        <iframe
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          loading="lazy"
+          allowFullScreen
+          referrerPolicy="no-referrer-when-downgrade"
+          src={mapEmbedUrl}
+          title={`Google Map showing location of ${name}`}
+          className="absolute inset-0"
+        ></iframe>
         
         {/* Get Directions Link */}
         {directionsUrl && (
