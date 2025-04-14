@@ -38,7 +38,7 @@ export default function GoogleMapComponent({ latitude, longitude, name, address 
 
   return (
     <div className="w-full md:w-80 lg:w-96 flex-shrink-0">
-      <div className="relative bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-sm w-full h-full">
+      <div className="relative bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-sm w-full aspect-square">
         {/* Map Iframe using Google Maps Embed API */}
         <div className="w-full h-full relative">
           <iframe
