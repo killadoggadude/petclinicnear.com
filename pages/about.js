@@ -23,9 +23,9 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="bg-white p-8 rounded-lg shadow border border-gray-200 prose prose-lg max-w-none">
+      {/* Main Content - Apply bg-white here, adjust padding, keep prose */}
+      <div className="container mx-auto px-4 py-12 max-w-4xl bg-white">
+        <div className="prose prose-lg max-w-none">
           <h2>Connecting Pet Parents with Great Care</h2>
           <p>
             Hey there, fellow animal lover! We started this Pet Clinic Directory for one simple reason: we know how much your furry (or feathery, or scaly!) friend means to you. Finding the right veterinarian or clinic shouldn't add stress when your pet needs care. It's tough sifting through endless search results, trying to figure out who's nearby, who's highly rated, and who really understands your pet's needs.

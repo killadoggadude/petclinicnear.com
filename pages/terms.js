@@ -24,9 +24,9 @@ export default function TermsPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="bg-white p-8 rounded-lg shadow border border-gray-200 prose prose-lg max-w-none">
+      {/* Main Content - Apply bg-white here, adjust padding, keep prose */}
+      <div className="container mx-auto px-4 py-12 max-w-4xl bg-white">
+        <div className="prose prose-lg max-w-none">
           <p className="text-sm text-gray-500">Last Updated: {lastUpdated}</p>
           
           <h2>Welcome!</h2>

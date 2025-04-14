@@ -25,13 +25,11 @@ export default function StaticPageLayout({ title, description, children }) {
          </div>
       </div>
 
-      {/* Main Content Area */} 
-      <div className="container mx-auto px-4 py-12 max-w-4xl"> {/* Max width for text content */}
-        <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
-            {/* Prose styles for better text formatting */}
-            <div className="prose prose-lg max-w-none">
-                 {children} 
-            </div>
+      {/* Main Content Area - Apply bg-white here, remove inner styling */}
+      <div className="container mx-auto px-4 py-12 max-w-4xl bg-white"> 
+        {/* Remove inner div styling, apply prose directly */}
+        <div className="prose prose-lg max-w-none">
+             {children} 
         </div>
       </div>
     </>
