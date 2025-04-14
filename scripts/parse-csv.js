@@ -11,19 +11,28 @@ const OUTPUT_DATA_PATH = path.join(__dirname, '../data/processed_data.json');
 const SLUGIFY_OPTIONS = { lower: true, strict: true }; 
 
 // Define the ACTUAL headers expected in items.csv
+const KEYWORD_HEADER = 'Keyword';
+const FILLER_WORD_HEADER = 'Filler Word';
+const DESCRIPTION_HEADER = 'Description'; 
 const NAME_HEADER = 'Business Name'; 
-const LOCATION_HEADER = 'City';     
-const REGION_HEADER = 'State';    
-const STREET_HEADER = 'Street';
-const RATING_HEADER = 'Rating';
-const REVIEWS_HEADER = 'Number of Reviews';
 const WEBSITE_HEADER = 'Website';
+const CATEGORY_HEADER = 'Category';
 const PHONE_HEADER = 'Phone';
-const IMAGE_URL_HEADER = 'Image URL';
+const STREET_HEADER = 'Street';
+const CITY_HEADER = 'City';     
+const CITY_DESCRIPTION_HEADER = 'City Description'; // Assuming this exists
+const POSTAL_CODE_HEADER = 'postal_code';
+const REGION_HEADER = 'State';    
+const COUNTRY_HEADER = 'country';
 const LATITUDE_HEADER = 'Latitude';
 const LONGITUDE_HEADER = 'Longitude';
+const RATING_HEADER = 'Rating';
+const REVIEWS_HEADER = 'Number of Reviews';
+const REVIEWS_LINK_HEADER = 'reviews_link';
+const REVIEWS_TAGS_HEADER = 'reviews_tags';
+const IMAGE_URL_HEADER = 'Image URL';
 const WORKING_HOURS_HEADER = 'Working Hours';
-const DESCRIPTION_HEADER = 'Description'; 
+const LOCATION_LINK_HEADER = 'location_link';
 
 console.log('Starting data parsing (No AI Generation)...');
 
@@ -102,7 +111,7 @@ async function main() {
     const processingPromises = records.map((record, index) => { 
         const headers = Object.keys(record);
         const itemName = record[NAME_HEADER];
-        const cityName = record[LOCATION_HEADER];
+        const cityName = record[CITY_HEADER];
         const stateName = record[REGION_HEADER];
         
         if (!itemName || !cityName || !stateName) {
@@ -158,19 +167,28 @@ async function main() {
         // Build final itemData object
         const itemData = {};
         headers.forEach(header => {
-            // Use exact header name from CSV for lookup
-            const key = header.replace(/\s+(.)/g, (match, chr) => chr.toUpperCase())
-                              .replace(/\s+/g, '')
-                              .replace(/^./, chr => chr.toLowerCase()); 
-            itemData[key] = record[header] || null;
+            itemData[header] = record[header]; // Directly assign using original header
         });
-        
-        // Re-assign core fields and ensure description comes from mapping
-        itemData.name = record[NAME_HEADER];
+
+        // Manually assign or overwrite specific keys for consistency/slugs
+        itemData.name = record[NAME_HEADER]; // Ensure correct name field
         itemData.slug = itemSlug; 
         itemData.citySlug = citySlug; 
-        itemData.city = record[LOCATION_HEADER];
-        itemData.state = record[REGION_HEADER]; 
+        itemData.city = record[CITY_HEADER]; // Ensure correct city field using CITY_HEADER
+        itemData.state = record[REGION_HEADER]; // Ensure correct state field
+        
+        // Explicitly include the description using the correct header constant
+        // This ensures it's present even if the generic mapping didn't catch it
+        itemData.description = record[DESCRIPTION_HEADER] || null; 
+
+        // Clean up keys that might have been duplicated by the generic mapping
+        // Use the CONSTANTS defined above for the keys to delete
+        delete itemData[NAME_HEADER];
+        delete itemData[CITY_HEADER];
+        delete itemData[REGION_HEADER];
+        delete itemData[DESCRIPTION_HEADER]; // Remove the key with the original header name
+        
+        // Re-assign core fields and ensure description comes from mapping
         itemData.rating = record[RATING_HEADER]; 
         itemData.reviews = record[REVIEWS_HEADER];
         itemData.latitude = record[LATITUDE_HEADER]; 
@@ -198,13 +216,6 @@ async function main() {
             }
         }
         itemData.workingHours = parsedHours; // Assign the parsed object or null
-        
-        itemData.description = record[DESCRIPTION_HEADER] || null; 
-        
-        // Clean up keys based on original headers (might be redundant now)
-        delete itemData.businessName; // If key became businessName
-        delete itemData.numberOfReviews; // If key became numberOfReviews
-        delete itemData.imageURL; // If key became imageURL
         
         // Add item to city list and flat list
         cityMap[citySlug].items.push(itemData);

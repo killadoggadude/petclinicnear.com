@@ -88,6 +88,20 @@ export default function ItemPage({ item, metaDescription }) {
   };
   // --- END Schema Generation --- 
 
+  // --- Process Description --- 
+  let businessDescriptionHtml = null;
+  if (item?.description) {
+      const description = item.description.trim();
+      // Check if description starts with <h2 (case-insensitive)
+      if (description.toLowerCase().startsWith('<h2')) {
+          businessDescriptionHtml = description; // Use as is
+      } else {
+          // Prepend default H2
+          businessDescriptionHtml = `<h2>About ${item.name} in ${item.city}</h2>\n${description}`;
+      }
+  }
+  // --- End Process Description ---
+
   return (
     <>
       <Head>
@@ -311,17 +325,17 @@ export default function ItemPage({ item, metaDescription }) {
               )}
               {/* --- END: Working Hours Section --- */}
               
-               {/* --- START: Description Section (Moved Here) --- */}
-              {item.description && (
-                <div className="mt-8 pt-8 border-t border-gray-200"> {/* Adjusted margin/padding */} 
-                   <h2 className="text-2xl font-semibold mb-4 text-gray-800">About {item.name}</h2> {/* Updated margin */} 
-                   {/* Changed prose-lg to prose for smaller text */}
-                   <div className="prose max-w-none text-gray-700 leading-relaxed">
-                       <ReactMarkdown>{item.description}</ReactMarkdown>
-                   </div>
+              {/* --- START: Business Description Section --- */}
+              {businessDescriptionHtml && (
+                <div className="mt-8 pt-8 border-t border-gray-200"> 
+                   {/* Use prose for basic styling */}
+                   <div 
+                     className="prose prose-gray max-w-none text-gray-700 leading-relaxed"
+                     dangerouslySetInnerHTML={{ __html: businessDescriptionHtml }}
+                   />
                 </div>
               )}
-              {/* --- END: Description Section --- */}
+              {/* --- END: Business Description Section --- */}
 
             </div>
             {/* Back Link - Update style */}
