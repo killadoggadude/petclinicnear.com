@@ -22,8 +22,8 @@ export default function GoogleMapComponent({ latitude, longitude, name, address 
   }
 
   if (hasValidCoordinates) {
-    // Construct Google Maps Embed URL using coordinates
-    mapEmbedUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${latitude},${longitude}`;
+    // Construct Google Maps Embed URL using coordinates with zoom level 12 (4 steps zoomed out from default)
+    mapEmbedUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${latitude},${longitude}&zoom=12`;
     // Construct Google Maps Directions URL
     directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
   } else {
@@ -37,18 +37,18 @@ export default function GoogleMapComponent({ latitude, longitude, name, address 
   }
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full md:w-80 lg:w-96 flex-shrink-0">
       <div className="relative bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-sm w-full h-full">
         {/* Map Iframe using Google Maps Embed API */}
         <div className="w-full h-full relative">
           <iframe
             width="100%"
             height="100%"
-            style={{ border: 0 }} // Style attribute is preferred
+            style={{ border: 0 }}
             loading="lazy"
             allowFullScreen
             referrerPolicy="no-referrer-when-downgrade"
-            src={mapEmbedUrl} // Use Google Maps Embed URL
+            src={mapEmbedUrl}
             title={`Google Map showing location of ${name}`}
           ></iframe>
         </div>
