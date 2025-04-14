@@ -99,15 +99,15 @@ export default function BlogIndexPage({ posts }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
               <div key={post.slug} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 flex flex-col">
-                {/* Add Featured Image */} 
+                {/* Add Featured Image - Adjust container aspect ratio */} 
                 {post.imageUrl ? (
                     <Link href={`/blog/${post.slug}`}> 
-                       <span className="block relative w-full h-48 bg-gray-200"> 
+                       <span className="block relative w-full aspect-[3/2] bg-gray-200">
                          <Image 
                             src={post.imageUrl}
                             alt={post.title} 
                             layout="fill" 
-                            objectFit="contain"
+                            objectFit="cover"
                          /> 
                        </span>
                      </Link> 

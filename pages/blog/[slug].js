@@ -96,14 +96,14 @@ export default function BlogPostPage({ post }) {
       {/* Main Post Content Area */}
       <div className="container mx-auto px-4 py-12 max-w-4xl"> {/* Centered, max-width for readability */}
         <article className="bg-white p-6 md:p-8 rounded-lg shadow-md border border-gray-200">
-          {/* Featured Image Added Here */} 
+          {/* Featured Image Added Here - Adjust container aspect ratio */} 
           {post.imageUrl && (
-             <div className="relative w-full h-64 md:h-80 mb-6 rounded-md overflow-hidden"> 
+             <div className="relative w-full aspect-[3/2] mb-6 rounded-md overflow-hidden"> {/* Removed fixed height, added aspect-ratio */} 
                 <Image 
                     src={post.imageUrl}
                     alt={post.title} 
                     layout="fill" 
-                    objectFit="contain"
+                    objectFit="cover" // Changed back to cover
                     priority // Prioritize loading for hero image
                 />
              </div>
