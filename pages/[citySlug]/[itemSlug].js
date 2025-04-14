@@ -344,7 +344,7 @@ export default function ItemPage({ item, metaDescription }) {
           {/* ... Sidebar ... */}
           <aside className="w-full lg:w-1/3 flex-shrink-0 space-y-6">
             {/* Google Map */}
-            <div className="w-full h-auto aspect-square md:h-80 lg:h-96"> 
+            <div className="w-full md:w-80 lg:w-96 flex-shrink-0"> 
               <GoogleMapComponent 
                 latitude={item.latitude}
                 longitude={item.longitude}
