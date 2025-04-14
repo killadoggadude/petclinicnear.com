@@ -184,15 +184,15 @@ export default function ItemPage({ item, metaDescription }) {
                           </p>
                         )}
                         {item.website && (
-                          <p className="mt-6"> 
+                          <p className="mt-4"> {/* Adjusted margin if needed */} 
                             <a 
                               href={item.website.startsWith('http') ? item.website : `http://${item.website}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              // Added button styling 
-                              className="inline-block bg-primary hover:bg-primary-600 text-white font-semibold py-2 px-4 mt-4 rounded-md text-sm transition duration-150 ease-in-out shadow"
+                              // Restore/Ensure button styling 
+                              className="inline-block bg-primary hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded-md text-sm transition duration-150 ease-in-out shadow"
                             >
-                              Visit Website
+                              Visit Website {/* Ensure text is correct */}
                             </a> 
                           </p>
                        )}
@@ -202,17 +202,15 @@ export default function ItemPage({ item, metaDescription }) {
               )}
               {/* --- END: Image Hero Section --- */}
 
-              {/* --- START: Duplicate Info Section --- */}
+              {/* --- START: Main Info Section Below Hero --- */}
               <div className="mb-6 pb-6 border-b border-gray-200">
-                 {/* Updated H2 to include city/state */}
-                <h2 className="text-2xl font-bold mb-3 text-gray-800">
+                <h2 className="text-2xl font-bold mb-4 text-gray-800">
                   {item.name}{item.city ? ` in ${item.city}${item.state ? `, ${item.state}` : ''}` : ''}
                 </h2>
-                {/* Increased font size in this div */}
-                <div className="space-y-1 text-lg text-gray-700"> {/* Changed text-base to text-lg */} 
+                <div className="space-y-2 text-lg text-gray-700"> {/* Adjusted spacing */} 
                    {item.street && item.city && item.state && (
-                      <p className="flex items-start"> 
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <p className="flex items-center"> {/* Keep items-center for vertical alignment */} 
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                           </svg>
                           <span>{item.street}, {item.city}, {item.state}</span>
@@ -231,19 +229,17 @@ export default function ItemPage({ item, metaDescription }) {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                            <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
                         </svg>
-                        {/* Display domain name as link text */}
-                        <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
-                          {(() => { // IIFE to calculate domain
+                        {/* Display domain name as link text, ensure correct styling */}
+                        <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-800 hover:underline break-all">
+                          {(() => { 
                               try {
                                 const url = new URL(item.website.startsWith('http') ? item.website : `http://${item.website}`);
                                 let hostname = url.hostname;
-                                // Remove optional 'www.' prefix
                                 if (hostname.startsWith('www.')) {
                                   hostname = hostname.substring(4);
                                 }
                                 return hostname;
                               } catch (e) {
-                                // Fallback if URL parsing fails
                                 return item.website;
                               }
                            })()} 
@@ -252,18 +248,10 @@ export default function ItemPage({ item, metaDescription }) {
                    )}
                 </div>
               </div>
-              {/* --- END: Duplicate Info Section --- */}
+              {/* --- END: Main Info Section Below Hero --- */}
 
-              {/* City/State Link - Remains Below Duplicate Info */}
-              {item.city && (
-                  <p className="text-lg text-gray-600 mb-5">
-                      Located in: 
-                      <Link href={`/${item.citySlug}`}>
-                         <span className="hover:underline cursor-pointer font-medium text-primary-600 hover:text-primary-800"> {item.city}</span>
-                      </Link>
-                      {item.state && <span className="text-gray-500">, {item.state}</span>}
-                  </p>
-              )}
+              {/* City/State Link is now redundant here, remove or comment out */}
+              {/* {item.city && (...)} */}
               
               {/* Container for Rating & Top Rated Badge */}
               <div className="flex flex-col md:flex-row gap-8 items-start mt-6 pt-6 border-t border-gray-200"> 
