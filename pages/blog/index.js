@@ -2,57 +2,48 @@ import Head from 'next/head'
 import Link from 'next/link'
 import fs from 'fs'
 import path from 'path'
+import Papa from 'papaparse' // Import papaparse
 import Breadcrumbs from '../../components/Breadcrumbs' // Adjust path if needed
-
-// Helper function to parse CSV data (simple implementation)
-function parseCsv(csvData) {
-  const lines = csvData.trim().split(/\r?\n/);
-  if (lines.length < 2) return []; // No data rows
-
-  const header = lines[0].split(',').map(h => h.trim());
-  const titleIndex = header.indexOf('title');
-  const slugIndex = header.indexOf('slug');
-  const contentIndex = header.indexOf('content');
-  const dateIndex = header.indexOf('date');
-
-  if (titleIndex === -1 || slugIndex === -1 || contentIndex === -1 || dateIndex === -1) {
-    console.error("CSV header missing required columns (title, slug, content, date)");
-    return [];
-  }
-
-  const posts = [];
-  for (let i = 1; i < lines.length; i++) {
-    // Basic split, assumes no commas within fields or uses quoting
-    // A more robust parser would handle quoted fields properly
-    const values = lines[i].split(','); 
-    if (values.length === header.length) {
-      posts.push({
-        title: values[titleIndex].trim(),
-        slug: values[slugIndex].trim(),
-        content: values[contentIndex].trim(), // Content might need more processing later
-        date: values[dateIndex].trim(),
-        // Add placeholder for image if needed later
-        // imageUrl: '...' 
-      });
-    } else {
-        console.warn(`Skipping CSV line ${i+1} due to incorrect column count.`);
-    }
-  }
-  // Sort posts by date, newest first (assuming YYYY-MM-DD format)
-  posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-  return posts;
-}
 
 export async function getStaticProps() {
   let posts = [];
   try {
     const dataPath = path.join(process.cwd(), 'data', 'blog_posts.csv');
     const csvData = fs.readFileSync(dataPath, 'utf-8');
-    posts = parseCsv(csvData);
+    
+    // Parse using papaparse
+    const parsedData = Papa.parse(csvData, {
+      header: true, // Use the first row as headers
+      skipEmptyLines: true, // Skip empty lines
+      transformHeader: header => header.trim(), // Trim header spaces
+    });
+
+    if (parsedData.errors.length > 0) {
+        console.error("Papaparse errors:", parsedData.errors);
+    }
+
+    if (parsedData.data && Array.isArray(parsedData.data)) {
+      // Ensure required fields exist and map data
+      posts = parsedData.data
+        .filter(row => row.title && row.slug && row.content && row.date)
+        .map(row => ({
+          title: row.title.trim(),
+          slug: row.slug.trim(),
+          content: row.content.trim(), 
+          date: row.date.trim(),
+        }));
+        
+      // Sort posts by date, newest first (assuming YYYY-MM-DD format)
+      posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else {
+      console.warn("Parsed data is not an array or is empty.");
+    }
+
   } catch (error) {
     console.error("Error reading or parsing blog_posts.csv:", error);
-    // Return empty props or handle error as needed
   }
+
+  console.log(`Found ${posts.length} blog posts.`); // Log how many posts were found
 
   return {
     props: {

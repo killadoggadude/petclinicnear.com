@@ -3,44 +3,43 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import fs from 'fs'
 import path from 'path'
+import Papa from 'papaparse' // Import papaparse
 import Breadcrumbs from '../../components/Breadcrumbs' // Adjust path if needed
 import ReactMarkdown from 'react-markdown' // To render markdown content
 
-// Re-use the CSV parsing logic (or move to a shared lib/helper)
-function parseCsv(csvData) {
-  const lines = csvData.trim().split(/\r?\n/);
-  if (lines.length < 2) return [];
-  const header = lines[0].split(',').map(h => h.trim());
-  const titleIndex = header.indexOf('title');
-  const slugIndex = header.indexOf('slug');
-  const contentIndex = header.indexOf('content');
-  const dateIndex = header.indexOf('date');
-  if (titleIndex === -1 || slugIndex === -1 || contentIndex === -1 || dateIndex === -1) return [];
-  const posts = [];
-  for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(','); 
-    if (values.length === header.length) {
-      posts.push({
-        title: values[titleIndex].trim(),
-        slug: values[slugIndex].trim(),
-        content: values[contentIndex].trim(), 
-        date: values[dateIndex].trim(),
-      });
-    } 
-  }
-  return posts;
-}
-
-export async function getStaticPaths() {
-  let posts = [];
+// Helper to get all parsed posts (can be moved to a lib)
+function getAllBlogPosts() {
   try {
     const dataPath = path.join(process.cwd(), 'data', 'blog_posts.csv');
     const csvData = fs.readFileSync(dataPath, 'utf-8');
-    posts = parseCsv(csvData);
-  } catch (error) {
-    console.error("Error reading blog CSV for paths:", error);
-  }
+    const parsedData = Papa.parse(csvData, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: header => header.trim(),
+    });
 
+    if (parsedData.errors.length > 0) {
+        console.error("Papaparse errors:", parsedData.errors);
+    }
+
+    if (parsedData.data && Array.isArray(parsedData.data)) {
+        return parsedData.data
+          .filter(row => row.title && row.slug && row.content && row.date)
+          .map(row => ({
+            title: row.title.trim(),
+            slug: row.slug.trim(),
+            content: row.content.trim(),
+            date: row.date.trim(),
+          }));
+    } 
+  } catch (error) {
+    console.error("Error reading or parsing blog_posts.csv in getAllBlogPosts:", error);
+  }
+  return []; // Return empty array on error or if no data
+}
+
+export async function getStaticPaths() {
+  const posts = getAllBlogPosts();
   const paths = posts.map(post => ({
     params: { slug: post.slug },
   }));
@@ -49,15 +48,8 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  let post = null;
-  try {
-    const dataPath = path.join(process.cwd(), 'data', 'blog_posts.csv');
-    const csvData = fs.readFileSync(dataPath, 'utf-8');
-    const posts = parseCsv(csvData);
-    post = posts.find(p => p.slug === params.slug) || null;
-  } catch (error) {
-    console.error(`Error reading blog CSV for slug ${params.slug}:`, error);
-  }
+  const posts = getAllBlogPosts();
+  const post = posts.find(p => p.slug === params.slug) || null;
 
   if (!post) {
     return { notFound: true };
