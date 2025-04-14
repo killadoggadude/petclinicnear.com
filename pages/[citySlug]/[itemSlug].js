@@ -189,19 +189,19 @@ export default function ItemPage({ item, metaDescription }) {
                           </>
                         )}
                       </p>
-                      {/* Website Button - Increase top margin */}
-                      <p className="mt-6">
-                        {item.website && (
-                            <a 
-                              href={item.website.startsWith('http') ? item.website : `http://${item.website}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-block bg-primary hover:bg-primary-600 text-white font-semibold py-2 px-4 mt-4 rounded-md text-sm transition duration-150 ease-in-out shadow"
-                            >
-                              Visit Website
-                            </a>
-                         )}
-                       </p>
+                      {/* Website Button - Increase top margin - Conditionally render */}
+                      {item.website && (
+                        <p className="mt-6">
+                          <a 
+                            href={item.website.startsWith('http') ? item.website : `http://${item.website}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block bg-primary hover:bg-primary-600 text-white font-semibold py-2 px-4 mt-4 rounded-md text-sm transition duration-150 ease-in-out shadow"
+                          >
+                            Visit Website
+                          </a>
+                         </p>
+                       )}
                     </div>
                   </div>
                 </div>
@@ -237,22 +237,25 @@ export default function ItemPage({ item, metaDescription }) {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                            <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
                         </svg>
-                        <a href={item.website?.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-800 hover:underline break-all">
-                          {(() => { /* ... domain calculation ... */ 
-                              // Add check for item.website existence inside IIFE for safety
-                              if (!item.website) return null; 
-                              try {
-                                const url = new URL(item.website.startsWith('http') ? item.website : `http://${item.website}`);
-                                let hostname = url.hostname;
-                                if (hostname.startsWith('www.')) {
-                                  hostname = hostname.substring(4);
+                        {item.website ? (
+                          <a href={item.website?.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-800 hover:underline break-all">
+                            {(() => { 
+                                if (!item.website) return null; 
+                                try {
+                                  const url = new URL(item.website.startsWith('http') ? item.website : `http://${item.website}`);
+                                  let hostname = url.hostname;
+                                  if (hostname.startsWith('www.')) {
+                                    hostname = hostname.substring(4);
+                                  }
+                                  return hostname;
+                                } catch (e) {
+                                  return item.website;
                                 }
-                                return hostname;
-                              } catch (e) {
-                                return item.website;
-                              }
-                           })()} 
-                        </a> 
+                             })()} 
+                          </a> 
+                        ) : (
+                          <span className="text-gray-500 italic">No website</span> // Display this if no website
+                        )}
                     </p>
                 </div>
               </div>

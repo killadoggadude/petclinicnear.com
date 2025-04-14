@@ -73,17 +73,15 @@ export default function AllStatesPage({ states, totalStateCount, totalItemCount 
           // Grid for states
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {states.map((state) => (
-              // Placeholder Link - Needs actual state page route if desired, otherwise just display info
-              // For now, let's just display the info without linking. Add Link later if needed.
-              <div key={state.slug} className="block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-blue-300 transition duration-150 ease-in-out">
-                <h2 className="text-lg font-semibold text-gray-800">Pet Clinics in {state.name}</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  {state.itemCount || 0} {state.itemCount === 1 ? 'Veterinarian' : 'Veterinarians'}
-                </p>
-              </div>
-              // <Link key={state.slug} href={`/state/${state.slug}`}> // Example if linking later
-              //   <span className="... cursor-pointer">...</span>
-              // </Link>
+              // Wrap the div content in a Link component
+              <Link key={state.slug} href={`/${state.slug}`}> 
+                <span className="block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-blue-300 transition duration-150 ease-in-out cursor-pointer">
+                  <h2 className="text-lg font-semibold text-gray-800 hover:text-blue-600">Pet Clinics in {state.name}</h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {state.itemCount || 0} {state.itemCount === 1 ? 'Pet Clinic' : 'Pet Clinics'}
+                  </p>
+                </span>
+              </Link>
             ))}
           </div>
         ) : (
