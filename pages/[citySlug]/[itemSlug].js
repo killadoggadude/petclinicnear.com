@@ -189,8 +189,8 @@ export default function ItemPage({ item, metaDescription }) {
                           </>
                         )}
                       </p>
-                      {/* Website Button - Always render <p>, conditionally render <a> */}
-                      <p className="mt-4">
+                      {/* Website Button - Increase top margin */}
+                      <p className="mt-6">
                         {item.website && (
                             <a 
                               href={item.website.startsWith('http') ? item.website : `http://${item.website}`}
@@ -209,7 +209,7 @@ export default function ItemPage({ item, metaDescription }) {
               {/* --- END: Image Hero Section --- */}
 
               {/* --- START: Main Info Section Below Hero --- */}
-              <div className="mb-6 pb-6 border-b border-gray-200">
+              <div className="mb-6 pb-6">
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">
                   {item.name}{item.city ? ` in ${item.city}${item.state ? `, ${item.state}` : ''}` : ''}
                 </h2>
