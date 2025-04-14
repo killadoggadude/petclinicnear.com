@@ -19,6 +19,14 @@ export async function getStaticProps() {
       transformHeader: header => header.trim().toLowerCase().replace(/\s+/g, '_'), // Normalize headers
     });
 
+    // --- DEBUG LOGGING START ---
+    console.log("Papaparse detected headers (normalized):", parsedData.meta?.fields);
+    if (parsedData.data && parsedData.data.length > 0) {
+        console.log("First parsed row data:", parsedData.data[0]);
+        console.log("Accessing featured_image in first row:", parsedData.data[0]?.featured_image);
+    }
+    // --- DEBUG LOGGING END ---
+
     if (parsedData.errors.length > 0) {
         console.error("Papaparse errors:", parsedData.errors);
     }
@@ -46,7 +54,7 @@ export async function getStaticProps() {
     console.error("Error reading or parsing blog_posts.csv:", error);
   }
 
-  console.log(`Found ${posts.length} blog posts.`); // Log how many posts were found
+  console.log(`Found ${posts.length} blog posts. Posts with imageUrl: ${posts.filter(p => p.imageUrl).length}`); // Log counts
 
   return {
     props: {
