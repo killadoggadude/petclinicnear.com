@@ -107,7 +107,7 @@ export default function BlogIndexPage({ posts }) {
                             src={post.imageUrl}
                             alt={post.title} 
                             layout="fill" 
-                            objectFit="cover" 
+                            objectFit="contain"
                          /> 
                        </span>
                      </Link> 

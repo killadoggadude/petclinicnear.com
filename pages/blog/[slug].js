@@ -103,7 +103,7 @@ export default function BlogPostPage({ post }) {
                     src={post.imageUrl}
                     alt={post.title} 
                     layout="fill" 
-                    objectFit="cover" 
+                    objectFit="contain"
                     priority // Prioritize loading for hero image
                 />
              </div>
