@@ -4,8 +4,8 @@ import { useRouter } from 'next/router'
 import fs from 'fs'
 import path from 'path'
 import Papa from 'papaparse' // Import papaparse
+import Image from 'next/image' // Import Image component
 import Breadcrumbs from '../../components/Breadcrumbs' // Adjust path if needed
-import ReactMarkdown from 'react-markdown' // To render markdown content
 
 // Helper to get all parsed posts (can be moved to a lib)
 function getAllBlogPosts() {
@@ -15,7 +15,7 @@ function getAllBlogPosts() {
     const parsedData = Papa.parse(csvData, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: header => header.trim(),
+      transformHeader: header => header.trim().toLowerCase().replace(/\s+/g, '_'), // Normalize headers
     });
 
     if (parsedData.errors.length > 0) {
@@ -23,6 +23,7 @@ function getAllBlogPosts() {
     }
 
     if (parsedData.data && Array.isArray(parsedData.data)) {
+        // Check for normalized headers
         return parsedData.data
           .filter(row => row.title && row.slug && row.content && row.date)
           .map(row => ({
@@ -30,6 +31,8 @@ function getAllBlogPosts() {
             slug: row.slug.trim(),
             content: row.content.trim(),
             date: row.date.trim(),
+            // Construct image path assuming images are in public/featured_images
+            imageUrl: row.featured_image ? `/featured_images/${row.featured_image.trim()}` : null, 
           }));
     } 
   } catch (error) {
@@ -93,6 +96,19 @@ export default function BlogPostPage({ post }) {
       {/* Main Post Content Area */}
       <div className="container mx-auto px-4 py-12 max-w-4xl"> {/* Centered, max-width for readability */}
         <article className="bg-white p-6 md:p-8 rounded-lg shadow-md border border-gray-200">
+          {/* Featured Image Added Here */} 
+          {post.imageUrl && (
+             <div className="relative w-full h-64 md:h-80 mb-6 rounded-md overflow-hidden"> 
+                <Image 
+                    src={post.imageUrl}
+                    alt={post.title} 
+                    layout="fill" 
+                    objectFit="cover" 
+                    priority // Prioritize loading for hero image
+                />
+             </div>
+          )}
+          
           <header className="mb-6 pb-4 border-b border-gray-200">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">{post.title}</h1>
             <p className="text-sm text-gray-500">
@@ -100,11 +116,12 @@ export default function BlogPostPage({ post }) {
             </p>
           </header>
 
-          {/* Render Markdown Content */}
-          <div className="prose prose-lg max-w-none prose-indigo">
-             {/* Basic ReactMarkdown usage - customize further if needed */}
-             <ReactMarkdown>{post.content}</ReactMarkdown>
-          </div>
+          {/* Render HTML Content using dangerouslySetInnerHTML */}
+          <div 
+            className="prose prose-lg max-w-none prose-indigo" 
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+          
         </article>
 
         {/* Back to Blog Link */}

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import fs from 'fs'
 import path from 'path'
 import Papa from 'papaparse' // Import papaparse
+import Image from 'next/image' // Import Image
 import Breadcrumbs from '../../components/Breadcrumbs' // Adjust path if needed
 
 export async function getStaticProps() {
@@ -15,7 +16,7 @@ export async function getStaticProps() {
     const parsedData = Papa.parse(csvData, {
       header: true, // Use the first row as headers
       skipEmptyLines: true, // Skip empty lines
-      transformHeader: header => header.trim(), // Trim header spaces
+      transformHeader: header => header.trim().toLowerCase().replace(/\s+/g, '_'), // Normalize headers
     });
 
     if (parsedData.errors.length > 0) {
@@ -31,6 +32,8 @@ export async function getStaticProps() {
           slug: row.slug.trim(),
           content: row.content.trim(), 
           date: row.date.trim(),
+          // Construct image path assuming images are in public/featured_images
+          imageUrl: row.featured_image ? `/featured_images/${row.featured_image.trim()}` : null, 
         }));
         
       // Sort posts by date, newest first (assuming YYYY-MM-DD format)
@@ -88,14 +91,22 @@ export default function BlogIndexPage({ posts }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
               <div key={post.slug} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 flex flex-col">
-                {/* Placeholder for Image - Remove or add actual image logic later */}
-                {/* 
-                <Link href={`/blog/${post.slug}`}> 
-                   <span className="block relative w-full h-48 bg-gray-200"> 
-                     {post.imageUrl && <Image src={post.imageUrl} alt={post.title} layout="fill" objectFit="cover" />} 
-                   </span>
-                 </Link> 
-                 */}
+                {/* Add Featured Image */} 
+                {post.imageUrl ? (
+                    <Link href={`/blog/${post.slug}`}> 
+                       <span className="block relative w-full h-48 bg-gray-200"> 
+                         <Image 
+                            src={post.imageUrl}
+                            alt={post.title} 
+                            layout="fill" 
+                            objectFit="cover" 
+                         /> 
+                       </span>
+                     </Link> 
+                 ) : (
+                    // Optional: Placeholder if no image
+                    <div className="block relative w-full h-48 bg-gray-200"></div>
+                 )}
 
                 <div className="p-5 flex-grow flex flex-col">
                   <p className="text-sm text-gray-500 mb-2">
