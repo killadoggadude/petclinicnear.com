@@ -50,6 +50,7 @@ export default function GoogleMapComponent({ latitude, longitude, name, address 
             referrerPolicy="no-referrer-when-downgrade"
             src={mapEmbedUrl}
             title={`Google Map showing location of ${name}`}
+            className="absolute inset-0"
           ></iframe>
         </div>
         
