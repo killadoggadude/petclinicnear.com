@@ -171,12 +171,14 @@ async function main() {
         });
 
         // Manually assign or overwrite specific keys for consistency/slugs
-        itemData.name = record[NAME_HEADER]; // Ensure correct name field
+        itemData.name = record[NAME_HEADER]; 
         itemData.slug = itemSlug; 
         itemData.citySlug = citySlug; 
-        itemData.city = record[CITY_HEADER]; // Ensure correct city field
-        itemData.state = record[REGION_HEADER]; // Ensure correct state field
-        itemData.street = record[STREET_HEADER]; // FIX: Explicitly assign street
+        itemData.city = record[CITY_HEADER]; 
+        itemData.state = record[REGION_HEADER]; 
+        itemData.street = record[STREET_HEADER]; 
+        itemData.phone = record[PHONE_HEADER]; // FIX: Explicitly assign lowercase phone
+        itemData.website = record[WEBSITE_HEADER]; // FIX: Explicitly assign lowercase website
         
         // Explicitly include the description using the correct header constant
         itemData.description = record[DESCRIPTION_HEADER] || null; 
@@ -186,8 +188,10 @@ async function main() {
         delete itemData[NAME_HEADER];
         delete itemData[CITY_HEADER];
         delete itemData[REGION_HEADER];
-        delete itemData[STREET_HEADER]; // FIX: Delete original Street key
-        delete itemData[DESCRIPTION_HEADER]; // Remove the key with the original header name
+        delete itemData[STREET_HEADER]; 
+        delete itemData[PHONE_HEADER]; // FIX: Delete original Phone key
+        delete itemData[WEBSITE_HEADER]; // FIX: Delete original Website key
+        delete itemData[DESCRIPTION_HEADER]; 
         
         // Re-assign core fields and ensure description comes from mapping
         itemData.rating = record[RATING_HEADER]; 
