@@ -36,7 +36,7 @@ function Footer({ currentYear }) {
         </div>
          {/* Copyright & Sitemap */}
         <div className="text-center text-gray-400 text-sm mt-6 pt-6 border-t border-gray-700 space-y-1">
-           <p>&copy; {currentYear} Directory. All rights reserved.</p>
+           <p>&copy; {currentYear} Pet Clinic Near Directory. All rights reserved.</p>
            {/* Re-added Sitemap Link Here */}
            <p className="text-xs leading-5">
              <Link href="/sitemap.xml">
@@ -177,8 +177,10 @@ export default function Layout({ children }) {
                <Link href="/">
                  <span className="text-gray-700 hover:bg-gray-100 hover:text-primary px-4 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-150">Home</span>
                </Link>
-               {/* Remove All States Link */}
-               {/* <Link href="/states"> ... </Link> */}
+               {/* Add Pet Clinics by State Link */}
+               <Link href="/states">
+                 <span className="text-gray-700 hover:bg-gray-100 hover:text-primary px-4 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-150">Pet Clinics by State</span>
+               </Link>
                {/* Keep All Cities Link, update text */}
                <Link href="/cities">
                  <span className="text-gray-700 hover:bg-gray-100 hover:text-primary px-4 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-150">Best Pet Clinics by City</span>
@@ -215,8 +217,10 @@ export default function Layout({ children }) {
                 <Link href="/">
                   <span onClick={toggleMobileMenu} className="text-gray-700 hover:bg-gray-100 hover:text-primary block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-150">Home</span>
                 </Link>
-                {/* Remove All States Link */}
-                {/* <Link href="/states"> ... </Link> */}
+                {/* Add Pet Clinics by State Link (Mobile) */}
+                <Link href="/states">
+                  <span onClick={toggleMobileMenu} className="text-gray-700 hover:bg-gray-100 hover:text-primary block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-150">Pet Clinics by State</span>
+                </Link>
                 {/* Keep All Cities Link, update text */}
                 <Link href="/cities">
                   <span onClick={toggleMobileMenu} className="text-gray-700 hover:bg-gray-100 hover:text-primary block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-150">Best Pet Clinics by City</span>

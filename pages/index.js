@@ -6,6 +6,7 @@ import ListingCard from '../components/ListingCard'; // Import the extracted com
 import FilterSidebar from '../components/FilterSidebar' // CORRECTED PATH: Import the sidebar
 import Breadcrumbs from '../components/Breadcrumbs' // CORRECTED PATH: Import Breadcrumbs
 import { useRouter } from 'next/router' // Import useRouter
+const { getProcessedData } = require('../lib/data'); // Import helper
 
 // Load and prepare data at build time
 export async function getStaticProps() {
@@ -14,17 +15,17 @@ export async function getStaticProps() {
   
   let cities = [];
   let allItems = []; // Still load allItems to find best rated
+  let processedData = {}; // Initialize processedData
 
   try {
-      const dataPath = path.join(process.cwd(), 'data', 'processed_data.json');
-      const jsonData = fs.readFileSync(dataPath, 'utf-8');
-      const processedData = JSON.parse(jsonData);
+      processedData = getProcessedData(); // Use helper
       cities = processedData?.cities || []; 
       allItems = processedData?.allItems || []; 
       console.log(`DEBUG (Homepage getStaticProps): Read ${allItems.length} items, ${cities.length} cities.`);
   } catch (error) {
       console.error("Error reading or parsing processed data for homepage:", error);
-      return { props: { /* Return empty/default props on error */ bestRatedListings: [], topCityColumns: [], totalItemCount: 0 } };
+      // Return empty/default props on error, including for states
+      return { props: { bestRatedListings: [], topCityColumns: [], topStateColumns: [], totalItemCount: 0 } };
   }
   
   // Sort items by rating
@@ -62,11 +63,36 @@ export async function getStaticProps() {
   });
   // --- END: Select and Group Top Cities ---
 
+  // --- START: Select and Group Top States ---
+  const stateCounts = {};
+  allItems.forEach(item => {
+    const stateName = item.state || 'Unknown State';
+    if (stateName !== 'Unknown State') { 
+      stateCounts[stateName] = (stateCounts[stateName] || 0) + 1;
+    }
+  });
+
+  const allStates = Object.entries(stateCounts).map(([name, count]) => ({
+    name: name,
+    slug: name.toLowerCase().replace(/\s+/g, '-'), 
+    itemCount: count,
+  })).sort((a, b) => a.name.localeCompare(b.name)); // Sort states alphabetically
+
+  const NUM_STATE_COLUMNS = 4; // Can be same or different from city columns
+  const topStateColumns = Array.from({ length: NUM_STATE_COLUMNS }, () => []);
+  allStates.forEach((state, index) => { // Use all states for now, can slice later if needed
+    topStateColumns[index % NUM_STATE_COLUMNS].push({
+        name: state.name,
+        slug: state.slug, 
+        itemCount: state.itemCount,
+    });
+  });
+  // --- END: Select and Group Top States ---
+
   return {
     props: {
       topCityColumns, 
-      // DO NOT PASS allItems
-      // allItems,
+      topStateColumns, // Add states to props
       bestRatedListings, 
       // Pass totalItemCount if needed for display, otherwise remove
       // totalItemCount: allItems.length, 
@@ -108,7 +134,7 @@ function FaqItem({ question, answer, isOpen, onToggle }) {
 }
 
 // --- Homepage Component --- 
-export default function Home({ bestRatedListings, topCityColumns }) {
+export default function Home({ bestRatedListings, topCityColumns, topStateColumns }) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaqStates, setOpenFaqStates] = useState({});
@@ -252,6 +278,39 @@ export default function Home({ bestRatedListings, topCityColumns }) {
                           <Link href="/cities">
                               <span className="text-primary-600 hover:text-primary-800 hover:underline font-medium">
                                   View All Cities &rarr;
+                              </span>
+                          </Link>
+                      </div>
+                  </section>
+              )}
+
+              {/* Browse Pet Clinics by State Section - New Section */}
+              {topStateColumns && topStateColumns.length > 0 && (
+                  <section className="mb-16">
+                      <h2 className="text-3xl font-bold text-center mb-8">Browse Pet Clinics by State</h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {topStateColumns.map((column, colIndex) => (
+                              <div key={colIndex} className="p-5 bg-white rounded-lg shadow border border-gray-100">
+                                  <ul className="space-y-1.5">
+                                      {Array.isArray(column) && column.map(state => (
+                                          <li key={state.slug}>
+                                              {/* Placeholder Link - Will point to /states for now, could link to specific state page later */}
+                                              <Link href={`/states`}> 
+                                                  <span className="block text-primary-600 hover:text-primary-800 hover:underline text-sm truncate">
+                                                      {state.name} <span className="text-xs text-gray-400">({state.itemCount})</span>
+                                                  </span>
+                                              </Link>
+                                          </li>
+                                      ))}
+                                  </ul>
+                              </div>
+                          ))}
+                      </div>
+                      {/* Link to see all states */}
+                      <div className="text-center mt-8">
+                          <Link href="/states">
+                              <span className="text-primary-600 hover:text-primary-800 hover:underline font-medium">
+                                  View All States &rarr;
                               </span>
                           </Link>
                       </div>
