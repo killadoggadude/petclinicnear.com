@@ -190,7 +190,7 @@ export default function ItemPage({ item, metaDescription }) {
                         )}
                       </p>
                       {/* Website Button - Increase top margin */}
-                      <p className="mt-6">
+                      <p className="mt-8">
                         {item.website && (
                             <a 
                               href={item.website.startsWith('http') ? item.website : `http://${item.website}`}
@@ -285,7 +285,7 @@ export default function ItemPage({ item, metaDescription }) {
                        <h3 className="text-xl font-semibold mb-2 text-gray-700">Top rated by customers</h3>
                        <div className="relative w-32 h-32"> {/* Sized container for image */} 
                            <Image 
-                               src="/images/best-rated-pet-clinic.png"
+                               src="/images/best-pet-clinic-award.png"
                                alt="Top Rated Pet Clinic Badge"
                                fill
                                style={{ objectFit: 'contain' }} // Use contain or cover as needed
