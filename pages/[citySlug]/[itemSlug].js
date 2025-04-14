@@ -167,35 +167,41 @@ export default function ItemPage({ item, metaDescription }) {
                     
                     {/* Moved Contact Details Here (no H3) */}
                     <div className="text-sm text-gray-200 space-y-1">
-                      {item.street && item.city && item.state && (
-                          <p className="flex items-start"> 
+                      {/* Address */}
+                      <p className="flex items-start">
+                        {item.street && item.city && item.state && (
+                           <>
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" opacity="0.8">
                                 <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                               </svg>
                               <span>{item.street}, {item.city}, {item.state}</span>
-                          </p>
+                           </>
                         )}
+                      </p>
+                      {/* Phone - Always render <p>, conditionally render content */}
+                      <p className="flex items-center">
                         {item.phone && (
-                          <p className="flex items-center"> 
+                          <>
                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" opacity="0.8">
                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                              </svg>
                              {item.phone}
-                          </p>
+                          </>
                         )}
+                      </p>
+                      {/* Website Button - Always render <p>, conditionally render <a> */}
+                      <p className="mt-4">
                         {item.website && (
-                          <p className="mt-4"> {/* Adjusted margin if needed */} 
                             <a 
                               href={item.website.startsWith('http') ? item.website : `http://${item.website}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              // Restore/Ensure button styling 
                               className="inline-block bg-primary hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded-md text-sm transition duration-150 ease-in-out shadow"
                             >
-                              Visit Website {/* Ensure text is correct */}
-                            </a> 
-                          </p>
-                       )}
+                              Visit Website
+                            </a>
+                         )}
+                       </p>
                     </div>
                   </div>
                 </div>
@@ -207,45 +213,53 @@ export default function ItemPage({ item, metaDescription }) {
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">
                   {item.name}{item.city ? ` in ${item.city}${item.state ? `, ${item.state}` : ''}` : ''}
                 </h2>
-                <div className="space-y-2 text-lg text-gray-700"> {/* Adjusted spacing */} 
-                   {item.street && item.city && item.state && (
-                      <p className="flex items-center"> {/* Keep items-center for vertical alignment */} 
+                <div className="space-y-2 text-lg text-gray-700"> 
+                   {/* Address */}
+                   <p className="flex items-center">
+                      {item.street && item.city && item.state && (
+                        <>
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                           </svg>
                           <span>{item.street}, {item.city}, {item.state}</span>
-                      </p>
-                    )}
-                    {item.phone && (
-                      <p className="flex items-center"> 
-                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                           <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                         </svg>
-                         {item.phone}
-                      </p>
-                    )}
-                    {item.website && (
-                      <p className="flex items-center"> 
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                           <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
-                        </svg>
-                        {/* Display domain name as link text, ensure correct styling */}
-                        <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-800 hover:underline break-all">
-                          {(() => { 
-                              try {
-                                const url = new URL(item.website.startsWith('http') ? item.website : `http://${item.website}`);
-                                let hostname = url.hostname;
-                                if (hostname.startsWith('www.')) {
-                                  hostname = hostname.substring(4);
+                        </>
+                      )}
+                    </p>
+                    {/* Phone - Always render <p>, conditionally render content */}
+                    <p className="flex items-center"> 
+                      {item.phone && (
+                        <>
+                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                             <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                           </svg>
+                           {item.phone}
+                        </>
+                      )}
+                    </p>
+                    {/* Website - Always render <p>, conditionally render content */}
+                    <p className="flex items-center"> 
+                      {item.website && (
+                        <>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                             <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+                          </svg>
+                          <a href={item.website.startsWith('http') ? item.website : `http://${item.website}`} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-800 hover:underline break-all">
+                            {(() => { 
+                                try {
+                                  const url = new URL(item.website.startsWith('http') ? item.website : `http://${item.website}`);
+                                  let hostname = url.hostname;
+                                  if (hostname.startsWith('www.')) {
+                                    hostname = hostname.substring(4);
+                                  }
+                                  return hostname;
+                                } catch (e) {
+                                  return item.website;
                                 }
-                                return hostname;
-                              } catch (e) {
-                                return item.website;
-                              }
-                           })()} 
-                        </a> 
-                      </p>
-                   )}
+                             })()} 
+                          </a> 
+                        </>
+                      )}
+                    </p>
                 </div>
               </div>
               {/* --- END: Main Info Section Below Hero --- */}
