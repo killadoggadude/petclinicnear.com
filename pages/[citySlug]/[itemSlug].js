@@ -257,6 +257,29 @@ export default function ItemPage({ item, metaDescription }) {
                           <span className="text-gray-500 italic">No website</span> // Display this if no website
                         )}
                     </p>
+                    {/* START: Location Link Section */}
+                    {item.city && item.state && item.citySlug && (
+                      <p className="flex items-center">
+                        {/* Simple Map Pin Icon */}
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="mr-1">Location:</span>
+                        <Link href={`/${item.citySlug}`}>
+                          <span className="text-primary-600 hover:text-primary-800 hover:underline cursor-pointer">{item.city}</span>
+                        </Link>
+                        {item.state && (
+                          <>
+                            <span className="mx-1">,</span>
+                            {/* Generate state slug on the fly - assumes simple lowercase replace */}
+                            <Link href={`/state/${item.state.toLowerCase().replace(/\s+/g, '-')}`}>
+                              <span className="text-primary-600 hover:text-primary-800 hover:underline cursor-pointer">{item.state}</span>
+                            </Link>
+                          </>
+                        )}
+                      </p>
+                    )}
+                    {/* END: Location Link Section */}
                 </div>
               </div>
               {/* --- END: Main Info Section Below Hero --- */}
