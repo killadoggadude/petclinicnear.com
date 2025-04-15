@@ -194,13 +194,6 @@ export default function Layout({ children }) {
                <Link href="/about">
                  <span className="text-gray-700 hover:bg-gray-100 hover:text-primary px-4 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-150">About</span>
                </Link>
-               <Link href="/contact">
-                 <span className="text-gray-700 hover:bg-gray-100 hover:text-primary px-4 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-150">Contact</span>
-               </Link>
-               {/* Add Blog Link */}
-               <Link href="/blog">
-                 <span className="text-gray-700 hover:bg-gray-100 hover:text-primary px-4 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-150">Blog</span>
-               </Link>
                {/* Search Toggle Button (Desktop) */}
                <button 
                 onClick={toggleSearch}
@@ -237,9 +230,6 @@ export default function Layout({ children }) {
                 */}
                 <Link href="/about">
                   <span onClick={toggleMobileMenu} className="text-gray-700 hover:bg-gray-100 hover:text-primary block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-150">About</span>
-                </Link>
-                <Link href="/contact">
-                  <span onClick={toggleMobileMenu} className="text-gray-700 hover:bg-gray-100 hover:text-primary block px-3 py-2 rounded-md text-base font-medium cursor-pointer transition-colors duration-150">Contact</span>
                 </Link>
                 {/* Add Blog Link (Mobile) */}
                 <Link href="/blog">
